@@ -1,6 +1,7 @@
 package com.droidev.brcwallet;
 
 import android.app.AlertDialog;
+import android.app.Dialog;
 import android.content.ClipData;
 import android.content.ClipboardManager;
 import android.content.Context;
@@ -13,6 +14,8 @@ import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.Window;
+import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
@@ -22,6 +25,7 @@ import android.widget.Toast;
 
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.app.AppCompatDelegate;
 import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
@@ -55,7 +59,15 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_YES);
+
         setContentView(R.layout.activity_main);
+
+        getWindow().setFlags(
+                android.view.WindowManager.LayoutParams.FLAG_SECURE,
+                android.view.WindowManager.LayoutParams.FLAG_SECURE
+        );
 
         View rootView = findViewById(android.R.id.content);
         ViewCompat.setOnApplyWindowInsetsListener(rootView, (v, insets) -> {
@@ -140,6 +152,7 @@ public class MainActivity extends AppCompatActivity {
         new AlertDialog.Builder(this)
                 .setTitle(getString(R.string.dialog_set_password_title))
                 .setView(layout)
+                .setCancelable(false)
                 .setPositiveButton(getString(R.string.button_create), (d, w) -> {
                     String pwd = edtPassword.getText().toString();
                     String confirmPwd = edtConfirm.getText().toString();
@@ -183,6 +196,7 @@ public class MainActivity extends AppCompatActivity {
         new AlertDialog.Builder(this)
                 .setTitle(getString(R.string.dialog_import_title))
                 .setView(layout)
+                .setCancelable(false)
                 .setPositiveButton(getString(R.string.button_import), (d, w) -> {
                     try {
                         byte[] priv = TxBuilder.fromHex(edtPrivateKey.getText().toString());
@@ -218,6 +232,7 @@ public class MainActivity extends AppCompatActivity {
         new AlertDialog.Builder(this)
                 .setTitle(getString(R.string.dialog_enter_password_title))
                 .setView(input)
+                .setCancelable(false)
                 .setPositiveButton(getString(R.string.button_ok), (d, w) -> {
                     try {
                         byte[] priv = store.loadPrivateKey(input.getText().toString());
@@ -235,6 +250,7 @@ public class MainActivity extends AppCompatActivity {
                 .setTitle(getString(R.string.dialog_private_key_title))
                 .setMessage(TxBuilder.toHex(priv))
                 .setPositiveButton(getString(R.string.button_ok), null)
+                .setCancelable(false)
                 .show();
     }
 
@@ -246,6 +262,7 @@ public class MainActivity extends AppCompatActivity {
         new AlertDialog.Builder(this)
                 .setTitle(getString(R.string.dialog_change_server_title))
                 .setView(input)
+                .setCancelable(false)
                 .setPositiveButton(getString(R.string.button_save), (d, w) -> {
                     String url = input.getText().toString().trim();
                     store.setApiBase(url);
@@ -262,18 +279,30 @@ public class MainActivity extends AppCompatActivity {
             return;
         }
 
-        View view = LayoutInflater.from(this).inflate(R.layout.dialog_send, null);
+        View view = LayoutInflater.from(this)
+                .inflate(R.layout.dialog_send, null);
+
         EditText edtTo = view.findViewById(R.id.edtTo);
         EditText edtAmount = view.findViewById(R.id.edtAmount);
         EditText edtPassword = view.findViewById(R.id.edtPassword);
         Button btnScan = view.findViewById(R.id.btnScan);
         Button btnSend = view.findViewById(R.id.btnSend);
+        TextView btnCancel = view.findViewById(R.id.btnCancel);
 
-        AlertDialog dialog = new AlertDialog.Builder(this)
-                .setTitle(getString(R.string.dialog_send_title))
-                .setView(view)
-                .setNegativeButton(getString(R.string.button_cancel), null)
-                .create();
+        Dialog dialog = new Dialog(this);
+        dialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
+        dialog.setContentView(view);
+        dialog.setCancelable(false);
+
+        Window window = dialog.getWindow();
+        if (window != null) {
+            window.setBackgroundDrawableResource(android.R.color.transparent);
+
+            WindowManager.LayoutParams params = window.getAttributes();
+            params.width = WindowManager.LayoutParams.MATCH_PARENT;
+            params.height = WindowManager.LayoutParams.WRAP_CONTENT;
+            window.setAttributes(params);
+        }
 
         btnScan.setOnClickListener(v -> {
             tempEdtTo = edtTo;
@@ -283,20 +312,30 @@ public class MainActivity extends AppCompatActivity {
         btnSend.setOnClickListener(v -> {
             try {
                 byte[] to = TxBuilder.fromHex(edtTo.getText().toString());
+
                 if (to.length != 32)
-                    throw new IllegalArgumentException(getString(R.string.error_address_length));
-                long amountWei = TxBuilder.brcToWei(edtAmount.getText().toString());
+                    throw new IllegalArgumentException(
+                            getString(R.string.error_address_length));
+
+                long amountWei =
+                        TxBuilder.brcToWei(edtAmount.getText().toString());
+
                 String password = edtPassword.getText().toString();
+
                 if (password.isEmpty()) {
                     toast(getString(R.string.toast_enter_password_to_send));
                     return;
                 }
+
                 performSend(to, amountWei, password);
                 dialog.dismiss();
+
             } catch (Exception e) {
                 toast(getString(R.string.toast_invalid_data, e.getMessage()));
             }
         });
+
+        btnCancel.setOnClickListener(v -> dialog.dismiss());
 
         dialog.show();
     }
@@ -475,6 +514,7 @@ public class MainActivity extends AppCompatActivity {
                 .setTitle(title).setMessage(msg)
                 .setPositiveButton(getString(R.string.dialog_new_wallet_title), (d, w) -> onYes.run())
                 .setNegativeButton(getString(R.string.button_cancel), null)
+                .setCancelable(false)
                 .show();
     }
 
@@ -487,6 +527,7 @@ public class MainActivity extends AppCompatActivity {
                 .setTitle(getString(R.string.dialog_set_height_title))
                 .setMessage(getString(R.string.dialog_set_height_message))
                 .setView(input)
+                .setCancelable(false)
                 .setPositiveButton(getString(R.string.button_set), (d, w) -> {
                     try {
                         long height = Long.parseLong(input.getText().toString());

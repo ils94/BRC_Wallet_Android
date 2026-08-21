@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <!-- App -->
-    <string name="app_name">Carteira BRC</string>
+    <string name="app_name">BRC Wallet</string>
 
     <!-- Main Activity -->
     <string name="label_receive_address">Endereço de recebimento</string>

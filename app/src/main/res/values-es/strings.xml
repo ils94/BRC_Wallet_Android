@@ -1,0 +1,109 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- App -->
+    <string name="app_name">Cartera BRC</string>
+
+    <!-- Actividad principal -->
+    <string name="label_receive_address">Dirección de recepción</string>
+    <string name="label_balance">Saldo: %1$s</string>
+    <string name="label_balance_empty">Saldo: —</string>
+    <string name="label_no_wallet">— (sin cartera)</string>
+    <string name="label_address_unavailable">Dirección no disponible</string>
+    <string name="button_copy">Copiar</string>
+    <string name="button_share">Compartir</string>
+    <string name="button_refresh">Actualizar saldo</string>
+    <string name="toast_address_copied">¡Dirección copiada!</string>
+    <string name="chooser_share_address">Compartir dirección</string>
+    <string name="clipboard_label_address">Dirección BRC</string>
+    <string name="qr_code_description">Código QR de la dirección</string>
+
+    <!-- Menú -->
+    <string name="menu_wallet">Cartera</string>
+    <string name="menu_send">Enviar BRC</string>
+    <string name="menu_history">Historial de transacciones</string>
+    <string name="menu_manage_wallet">Administrar cartera</string>
+    <string name="menu_new_wallet">Nueva cartera</string>
+    <string name="menu_import">Importar clave privada</string>
+    <string name="menu_export">Exportar clave privada</string>
+    <string name="menu_settings">Configuración</string>
+    <string name="menu_server">Servidor</string>
+    <string name="menu_sync_height">Altura de sincronización</string>
+
+    <!-- Diálogos: Nueva cartera -->
+    <string name="dialog_new_wallet_title">¿Crear nueva cartera?</string>
+    <string name="dialog_new_wallet_message">Esto borrará la cartera actual. Exporte la clave privada antes si tiene saldo.</string>
+    <string name="dialog_set_password_title">Establecer contraseña de la cartera</string>
+    <string name="hint_password">Contraseña</string>
+    <string name="hint_confirm_password">Confirmar contraseña</string>
+    <string name="button_create">Crear</string>
+    <string name="button_cancel">Cancelar</string>
+    <string name="toast_password_empty">La contraseña no puede estar vacía.</string>
+    <string name="toast_passwords_do_not_match">Las contraseñas no coinciden.</string>
+    <string name="toast_wallet_created">¡Nueva cartera creada!</string>
+
+    <!-- Diálogos: Importar -->
+    <string name="dialog_import_title">Importar clave privada</string>
+    <string name="hint_private_key">Clave privada (64 hex)</string>
+    <string name="hint_set_wallet_password">Establecer contraseña de la cartera</string>
+    <string name="button_import">Importar</string>
+    <string name="error_private_key_length">debe tener 32 bytes</string>
+    <string name="toast_set_password_required">Defina una contraseña para proteger la cartera.</string>
+    <string name="toast_wallet_imported">¡Cartera importada!</string>
+    <string name="toast_invalid_key">Clave inválida: %1$s</string>
+
+    <!-- Diálogos: Exportar -->
+    <string name="dialog_enter_password_title">Ingrese la contraseña</string>
+    <string name="button_ok">Aceptar</string>
+    <string name="toast_wrong_password">¡Contraseña incorrecta!</string>
+    <string name="dialog_private_key_title">Clave privada — ¡guárdela de forma segura!</string>
+    <string name="toast_no_wallet">No se ha creado ninguna cartera.</string>
+
+    <!-- Diálogos: Cambiar servidor -->
+    <string name="dialog_change_server_title">URL del servidor auxiliar</string>
+    <string name="hint_server_url">http://ejemplo.com:9000</string>
+    <string name="button_save">Guardar</string>
+    <string name="toast_server_updated">¡Servidor actualizado!</string>
+
+    <!-- Diálogos: Enviar -->
+    <string name="dialog_send_title">Enviar BRC</string>
+    <string name="hint_recipient_address">Dirección del destinatario (64 hex)</string>
+    <string name="hint_amount_brc">Cantidad (BRC)</string>
+    <string name="hint_wallet_password">Contraseña de la cartera</string>
+    <string name="button_scan_qr">Escanear código QR</string>
+    <string name="button_send">Enviar</string>
+    <string name="toast_enter_password_to_send">Ingrese la contraseña de la cartera.</string>
+    <string name="toast_invalid_data">Datos inválidos: %1$s</string>
+    <string name="error_address_length">la dirección debe tener 64 caracteres hex</string>
+    <string name="scan_prompt">Apunte la cámara al código QR</string>
+
+    <!-- Mensajes de estado -->
+    <string name="status_syncing">Sincronizando…</string>
+    <string name="status_sync_progress">Sync: bloque %1$d / %2$d</string>
+    <string name="status_synced_to">Sincronizado hasta el bloque %1$d</string>
+    <string name="status_sync_error">Error de sincronización: %1$s</string>
+    <string name="status_sending">Enviando…</string>
+    <string name="status_insufficient_balance">Saldo insuficiente (%1$s)</string>
+    <string name="status_tx_admitted">¡Transacción admitida en la mempool!</string>
+    <string name="status_tx_sent_wait">Tx enviada. Espere la minería (~2.5 min/bloque).</string>
+    <string name="status_tx_rejected">Rechazada: %1$s</string>
+    <string name="status_send_error">Error al enviar: %1$s</string>
+
+    <!-- Diálogo: Establecer altura de sincronización -->
+    <string name="dialog_set_height_title">Establecer altura de sincronización</string>
+    <string name="dialog_set_height_message">Advertencia: establecer una altura diferente restablecerá el saldo y el nonce, y la sincronización comenzará desde ese bloque. Úselo solo si está seguro de que su cartera no tiene transacciones antes de esa altura.</string>
+    <string name="hint_block_height">Altura del bloque (ej. 50000)</string>
+    <string name="button_set">Establecer</string>
+    <string name="toast_height_set">Altura establecida en %1$d. Se reiniciará la sincronización.</string>
+    <string name="toast_invalid_height">Altura inválida.</string>
+
+    <!-- Historial -->
+    <string name="history_empty">Aún no hay transacciones registradas.</string>
+    <string name="history_title">Historial de transacciones</string>
+    <string name="tx_type_send">➡️ Enviado</string>
+    <string name="tx_type_receive">⬅️ Recibido</string>
+    <string name="tx_type_mine">⛏️ Minería</string>
+    <string name="tx_type_lock">🔒 Lock</string>
+    <string name="tx_type_redeem">🔓 Redeem</string>
+    <string name="tx_details_format">Bloque %1$d\nDe: %2$s\nPara: %3$s\nValor: %4$s%5$s</string>
+    <string name="tx_fee_suffix"> | Comisión: %1$s</string>
+</resources>
