@@ -1,0 +1,109 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- App -->
+    <string name="app_name">BRC Wallet</string>
+
+    <!-- Main Activity -->
+    <string name="label_receive_address">Receiving address</string>
+    <string name="label_balance">Balance: %1$s</string>
+    <string name="label_balance_empty">Balance: —</string>
+    <string name="label_no_wallet">— (no wallet)</string>
+    <string name="label_address_unavailable">Address unavailable</string>
+    <string name="button_copy">Copy</string>
+    <string name="button_share">Share</string>
+    <string name="button_refresh">Refresh balance</string>
+    <string name="toast_address_copied">Address copied!</string>
+    <string name="chooser_share_address">Share address</string>
+    <string name="clipboard_label_address">BRC Address</string>
+    <string name="qr_code_description">QR Code of address</string>
+
+    <!-- Menu -->
+    <string name="menu_wallet">Wallet</string>
+    <string name="menu_send">Send BRC</string>
+    <string name="menu_history">Transaction history</string>
+    <string name="menu_manage_wallet">Manage wallet</string>
+    <string name="menu_new_wallet">New wallet</string>
+    <string name="menu_import">Import private key</string>
+    <string name="menu_export">Export private key</string>
+    <string name="menu_settings">Settings</string>
+    <string name="menu_server">Server</string>
+    <string name="menu_sync_height">Sync height</string>
+
+    <!-- Dialogs: New wallet -->
+    <string name="dialog_new_wallet_title">Create new wallet?</string>
+    <string name="dialog_new_wallet_message">This will erase the current wallet. Export the private key first if it has balance.</string>
+    <string name="dialog_set_password_title">Set wallet password</string>
+    <string name="hint_password">Password</string>
+    <string name="hint_confirm_password">Confirm password</string>
+    <string name="button_create">Create</string>
+    <string name="button_cancel">Cancel</string>
+    <string name="toast_password_empty">Password cannot be empty.</string>
+    <string name="toast_passwords_do_not_match">Passwords do not match.</string>
+    <string name="toast_wallet_created">New wallet created!</string>
+
+    <!-- Dialogs: Import -->
+    <string name="dialog_import_title">Import private key</string>
+    <string name="hint_private_key">Private key (64 hex)</string>
+    <string name="hint_set_wallet_password">Set wallet password</string>
+    <string name="button_import">Import</string>
+    <string name="error_private_key_length">must be 32 bytes</string>
+    <string name="toast_set_password_required">Set a password to protect the wallet.</string>
+    <string name="toast_wallet_imported">Wallet imported!</string>
+    <string name="toast_invalid_key">Invalid key: %1$s</string>
+
+    <!-- Dialogs: Export -->
+    <string name="dialog_enter_password_title">Enter password</string>
+    <string name="button_ok">OK</string>
+    <string name="toast_wrong_password">Incorrect password!</string>
+    <string name="dialog_private_key_title">Private key — keep it safe!</string>
+    <string name="toast_no_wallet">No wallet created.</string>
+
+    <!-- Dialogs: Change server -->
+    <string name="dialog_change_server_title">Helper server URL</string>
+    <string name="hint_server_url">http://example.com:9000</string>
+    <string name="button_save">Save</string>
+    <string name="toast_server_updated">Server updated!</string>
+
+    <!-- Dialogs: Send -->
+    <string name="dialog_send_title">Send BRC</string>
+    <string name="hint_recipient_address">Recipient address (64 hex)</string>
+    <string name="hint_amount_brc">Amount (BRC)</string>
+    <string name="hint_wallet_password">Wallet password</string>
+    <string name="button_scan_qr">Scan QR code</string>
+    <string name="button_send">Send</string>
+    <string name="toast_enter_password_to_send">Enter the wallet password.</string>
+    <string name="toast_invalid_data">Invalid data: %1$s</string>
+    <string name="error_address_length">address must be 64 hex chars</string>
+    <string name="scan_prompt">Point the camera at the QR code</string>
+
+    <!-- Status messages -->
+    <string name="status_syncing">Synchronizing…</string>
+    <string name="status_sync_progress">Sync: block %1$d / %2$d</string>
+    <string name="status_synced_to">Synced to block %1$d</string>
+    <string name="status_sync_error">Sync error: %1$s</string>
+    <string name="status_sending">Sending…</string>
+    <string name="status_insufficient_balance">Insufficient balance (%1$s)</string>
+    <string name="status_tx_admitted">Transaction admitted to mempool!</string>
+    <string name="status_tx_sent_wait">Tx sent. Wait for mining (~2.5 min/block).</string>
+    <string name="status_tx_rejected">Rejected: %1$s</string>
+    <string name="status_send_error">Error sending: %1$s</string>
+
+    <!-- Set height dialog -->
+    <string name="dialog_set_height_title">Set sync height</string>
+    <string name="dialog_set_height_message">Warning: setting a different height will reset balance and nonce, and synchronization will restart from that block. Use only if you are sure your wallet has no transactions before that height.</string>
+    <string name="hint_block_height">Block height (e.g. 50000)</string>
+    <string name="button_set">Set</string>
+    <string name="toast_height_set">Height set to %1$d. Synchronization will restart.</string>
+    <string name="toast_invalid_height">Invalid height.</string>
+
+    <!-- History -->
+    <string name="history_empty">No transactions recorded yet.</string>
+    <string name="history_title">Transaction history</string>
+    <string name="tx_type_send">➡️ Sent</string>
+    <string name="tx_type_receive">⬅️ Received</string>
+    <string name="tx_type_mine">⛏️ Mining</string>
+    <string name="tx_type_lock">🔒 Lock</string>
+    <string name="tx_type_redeem">🔓 Redeem</string>
+    <string name="tx_details_format">Block %1$d\nFrom: %2$s\nTo: %3$s\nValue: %4$s%5$s</string>
+    <string name="tx_fee_suffix"> | Fee: %1$s</string>
+</resources>

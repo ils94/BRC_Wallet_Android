@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <item
+        android:id="@+id/menu_wallet"
+        android:title="@string/menu_wallet"
+        app:showAsAction="never">
+
+        <menu>
+            <item
+                android:id="@+id/action_send"
+                android:title="@string/menu_send"
+                app:showAsAction="never" />
+
+            <item
+                android:id="@+id/action_history"
+                android:title="@string/menu_history"
+                app:showAsAction="never" />
+        </menu>
+    </item>
+
+    <item
+        android:id="@+id/menu_wallet_management"
+        android:title="@string/menu_manage_wallet"
+        app:showAsAction="never">
+
+        <menu>
+            <item
+                android:id="@+id/action_new_wallet"
+                android:title="@string/menu_new_wallet"
+                app:showAsAction="never" />
+
+            <item
+                android:id="@+id/action_import"
+                android:title="@string/menu_import"
+                app:showAsAction="never" />
+
+            <item
+                android:id="@+id/action_export"
+                android:title="@string/menu_export"
+                app:showAsAction="never" />
+        </menu>
+    </item>
+
+    <item
+        android:id="@+id/menu_settings"
+        android:title="@string/menu_settings"
+        app:showAsAction="never">
+
+        <menu>
+            <item
+                android:id="@+id/action_change_api"
+                android:title="@string/menu_server"
+                app:showAsAction="never" />
+
+            <item
+                android:id="@+id/action_set_height"
+                android:title="@string/menu_sync_height"
+                app:showAsAction="never" />
+        </menu>
+    </item>
+
+</menu>
