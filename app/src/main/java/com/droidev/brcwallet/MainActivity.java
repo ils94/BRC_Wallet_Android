@@ -130,6 +130,13 @@ public class MainActivity extends AppCompatActivity implements DialogManager.Wal
     }
 
     @Override
+    public void onWalletExported(byte[] privKey) {
+        Intent intent = new Intent(this, ExportActivity.class);
+        intent.putExtra(ExportActivity.EXTRA_PRIVATE_KEY, TxBuilder.toHex(privKey));
+        startActivity(intent);
+    }
+
+    @Override
     public void onServerChanged(String newUrl) {
         api.setBaseUrl(newUrl);
         toast(getString(R.string.toast_server_updated));

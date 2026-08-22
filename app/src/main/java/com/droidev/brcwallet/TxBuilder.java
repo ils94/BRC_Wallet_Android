@@ -34,14 +34,14 @@ public final class TxBuilder {
     public static byte[] buildSignedTransfer(byte[] privKey, byte[] to,
                                              long amountWei, long feeWei, long nonce) {
         if (to == null || to.length != 32)
-            throw new IllegalArgumentException("'to' deve ter 32 bytes");
-        if (amountWei < 0 || feeWei < 0) throw new IllegalArgumentException("amount/fee negativos");
-        if (amountWei == 0 && feeWei == 0) throw new IllegalArgumentException("tx sem valor");
-        if (amountWei + feeWei > MAX_MONEY) throw new IllegalArgumentException("excede MAX_MONEY");
+            throw new IllegalArgumentException("'to' must be 32 bytes");
+        if (amountWei < 0 || feeWei < 0) throw new IllegalArgumentException("negative amount/fee");
+        if (amountWei == 0 && feeWei == 0) throw new IllegalArgumentException("transaction has no value");
+        if (amountWei + feeWei > MAX_MONEY) throw new IllegalArgumentException("exceeds MAX_MONEY");
         if (feeWei < MIN_FEE)
-            throw new IllegalArgumentException("fee abaixo do mínimo (" + MIN_FEE + " wei)");
+            throw new IllegalArgumentException("fee below minimum (" + MIN_FEE + " wei)");
         if (nonce < 0 || nonce > 0xFFFFFFFFL)
-            throw new IllegalArgumentException("nonce fora de u32");
+            throw new IllegalArgumentException("nonce outside u32 range");
 
         byte[] from = publicKeyFromPrivate(privKey);
 
@@ -75,7 +75,7 @@ public final class TxBuilder {
 
     public static byte[] fromHex(String s) {
         s = s.trim();
-        if ((s.length() & 1) != 0) throw new IllegalArgumentException("hex com tamanho ímpar");
+        if ((s.length() & 1) != 0) throw new IllegalArgumentException("hex string has odd length");
         byte[] out = new byte[s.length() / 2];
         for (int i = 0; i < out.length; i++) {
             out[i] = (byte) Integer.parseInt(s.substring(i * 2, i * 2 + 2), 16);
@@ -85,7 +85,7 @@ public final class TxBuilder {
 
     public static long brcToWei(String brc) {
         brc = brc.trim();
-        if (brc.isEmpty()) throw new IllegalArgumentException("valor vazio");
+        if (brc.isEmpty()) throw new IllegalArgumentException("empty value");
         java.math.BigDecimal d = new java.math.BigDecimal(brc);
         return d.movePointRight(8).longValueExact();
     }

@@ -114,4 +114,9 @@
     <string name="button_private_key">Chave privada</string>
     <string name="button_mnemonic">Frase mnemônica</string>
     <string name="dialog_mnemonic_title">Frase mnemônica (seed)</string>
+
+    <string name="clipboard_label_private_key">Chave privada</string>
+    <string name="clipboard_label_mnemonic">Frase mnemônica</string>
+    <string name="toast_copied">Copiado para a área de transferência!</string>
+    <string name="export_warning">Nunca compartilhe sua chave privada ou frase mnemônica com ninguém!</string>
 </resources>

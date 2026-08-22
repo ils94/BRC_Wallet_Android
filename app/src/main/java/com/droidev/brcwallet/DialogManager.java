@@ -22,6 +22,8 @@ public class DialogManager {
 
         void onWalletImported();
 
+        void onWalletExported(byte[] privKey);
+
         void onServerChanged(String newUrl);
 
         void onHeightSet(long height);
@@ -157,43 +159,13 @@ public class DialogManager {
                 .setPositiveButton(context.getString(R.string.button_ok), (d, w) -> {
                     try {
                         byte[] priv = store.loadPrivateKey(input.getText().toString());
-                        showExportFormatDialog(priv);
+                        // Chama o callback para abrir a ExportActivity
+                        callback.onWalletExported(priv);
                     } catch (Exception e) {
                         toast(context.getString(R.string.toast_wrong_password));
                     }
                 })
                 .setNegativeButton(context.getString(R.string.button_cancel), null)
-                .show();
-    }
-
-    private void showExportFormatDialog(byte[] priv) {
-        new AlertDialog.Builder(context)
-                .setTitle(context.getString(R.string.dialog_export_format_title))
-                .setCancelable(false)
-                .setPositiveButton(context.getString(R.string.button_private_key), (d, w) -> showPrivateKeyDialog(priv))
-                .setNegativeButton(context.getString(R.string.button_mnemonic), (d, w) -> {
-                    String mnemonic = Bip39Helper.entropyToMnemonic(priv);
-                    showMnemonicDialog(mnemonic);
-                })
-                .setNeutralButton(context.getString(R.string.button_cancel), null)
-                .show();
-    }
-
-    private void showPrivateKeyDialog(byte[] priv) {
-        new AlertDialog.Builder(context)
-                .setTitle(context.getString(R.string.dialog_private_key_title))
-                .setMessage(TxBuilder.toHex(priv))
-                .setPositiveButton(context.getString(R.string.button_ok), null)
-                .setCancelable(false)
-                .show();
-    }
-
-    private void showMnemonicDialog(String mnemonic) {
-        new AlertDialog.Builder(context)
-                .setTitle(context.getString(R.string.dialog_mnemonic_title))
-                .setMessage(mnemonic)
-                .setPositiveButton(context.getString(R.string.button_ok), null)
-                .setCancelable(false)
                 .show();
     }
 

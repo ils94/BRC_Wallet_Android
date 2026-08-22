@@ -16,6 +16,9 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.BRCWallet">
         <activity
+            android:name=".ExportActivity"
+            android:exported="false" />
+        <activity
             android:name=".HistoryActivity"
             android:exported="false"
             android:theme="@style/Theme.BRCWallet" />

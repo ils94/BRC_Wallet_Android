@@ -7,24 +7,17 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.regex.Pattern;
 
-/**
- * Utilitários para conversão entre chave privada e frase mnemônica (BIP39).
- */
 public final class Bip39Helper {
 
     private static final Pattern HEX_PATTERN = Pattern.compile("^[0-9a-fA-F]{64}$");
 
-    private Bip39Helper() {}
+    private Bip39Helper() {
+    }
 
-    /** Verifica se a string é uma chave privada hexadecimal de 32 bytes. */
     public static boolean isHexPrivateKey(String input) {
         return HEX_PATTERN.matcher(input).matches();
     }
 
-    /**
-     * Converte uma frase mnemônica BIP39 para a entropia (32 bytes = chave privada).
-     * @throws Exception se a frase for inválida ou não gerar 32 bytes.
-     */
     public static byte[] mnemonicToEntropy(String mnemonic) throws Exception {
         try {
             List<String> words = Arrays.asList(mnemonic.trim().split("\\s+"));
@@ -38,13 +31,11 @@ public final class Bip39Helper {
         }
     }
 
-    /** Converte uma chave privada (32 bytes) para frase mnemônica BIP39. */
     public static String entropyToMnemonic(byte[] entropy) {
         try {
             List<String> words = MnemonicCode.INSTANCE.toMnemonic(entropy);
             return String.join(" ", words);
         } catch (MnemonicException e) {
-            // Não deve ocorrer para 32 bytes
             return "";
         }
     }

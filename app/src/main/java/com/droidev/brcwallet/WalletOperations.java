@@ -35,7 +35,6 @@ public class WalletOperations {
 
     public void refreshBalance(ProgressCallback progressCallback, CompletionCallback doneCallback) {
         if (!store.hasWallet()) {
-            // Chamado a partir da main thread (botão)
             postCompletion(doneCallback, false, context.getString(R.string.toast_no_wallet));
             return;
         }
