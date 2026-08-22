@@ -129,4 +129,6 @@
     <string name="toast_notification_permission_denied">Permissão de notificação negada. O serviço não será iniciado.</string>
     <string name="toast_sync_started">Sincronização automática iniciada</string>
     <string name="toast_sync_stopped">Sincronização automática parada</string>
+
+    <string name="menu_sync">Sincronização</string>
 </resources>

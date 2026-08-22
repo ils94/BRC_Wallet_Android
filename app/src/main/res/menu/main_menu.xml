@@ -21,6 +21,29 @@
     </item>
 
     <item
+        android:id="@+id/menu_sync"
+        android:title="@string/menu_sync"
+        app:showAsAction="never">
+
+        <menu>
+            <item
+                android:id="@+id/action_start_sync"
+                android:title="@string/menu_start_sync"
+                app:showAsAction="never" />
+
+            <item
+                android:id="@+id/action_stop_sync"
+                android:title="@string/menu_stop_sync"
+                app:showAsAction="never" />
+
+            <item
+                android:id="@+id/action_set_height"
+                android:title="@string/menu_sync_height"
+                app:showAsAction="never" />
+        </menu>
+    </item>
+
+    <item
         android:id="@+id/menu_wallet_management"
         android:title="@string/menu_manage_wallet"
         app:showAsAction="never">
@@ -52,19 +75,6 @@
             <item
                 android:id="@+id/action_change_api"
                 android:title="@string/menu_server"
-                app:showAsAction="never" />
-
-            <item
-                android:id="@+id/action_set_height"
-                android:title="@string/menu_sync_height"
-                app:showAsAction="never" />
-            <item
-                android:id="@+id/action_start_sync"
-                android:title="@string/menu_start_sync"
-                app:showAsAction="never" />
-            <item
-                android:id="@+id/action_stop_sync"
-                android:title="@string/menu_stop_sync"
                 app:showAsAction="never" />
         </menu>
     </item>

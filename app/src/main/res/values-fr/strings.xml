@@ -129,4 +129,6 @@
     <string name="toast_notification_permission_denied">Autorisation de notification refusée. Le service ne sera pas démarré.</string>
     <string name="toast_sync_started">Synchronisation automatique démarrée</string>
     <string name="toast_sync_stopped">Synchronisation automatique arrêtée</string>
+
+    <string name="menu_sync">Synchronisation</string>
 </resources>

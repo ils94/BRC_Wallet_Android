@@ -129,4 +129,6 @@
     <string name="toast_notification_permission_denied">Benachrichtigungsberechtigung verweigert. Der Dienst wird nicht gestartet.</string>
     <string name="toast_sync_started">Automatische Synchronisierung gestartet</string>
     <string name="toast_sync_stopped">Automatische Synchronisierung gestoppt</string>
+
+    <string name="menu_sync">Synchronisierung</string>
 </resources>

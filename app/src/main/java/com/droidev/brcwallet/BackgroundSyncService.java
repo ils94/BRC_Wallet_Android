@@ -6,6 +6,7 @@ import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.app.Service;
 import android.content.Intent;
+import android.content.pm.ServiceInfo;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.Looper;
@@ -18,9 +19,9 @@ public class BackgroundSyncService extends Service {
     private static final int NOTIFICATION_ID = 1001;
 
     private Handler handler;
-    private Runnable syncRunnable;
     private WalletOperations operations;
     private WalletStore store;
+    private boolean isSyncing = false;
 
     @Override
     public void onCreate() {
@@ -33,16 +34,18 @@ public class BackgroundSyncService extends Service {
 
         createNotificationChannel();
 
-        startForeground(NOTIFICATION_ID, buildNotification("Automatic synchronization active"));
+        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.Q) {
+            startForeground(NOTIFICATION_ID, buildNotification("Automatic synchronization active"),
+                    ServiceInfo.FOREGROUND_SERVICE_TYPE_DATA_SYNC);
+        } else {
+            startForeground(NOTIFICATION_ID, buildNotification("Automatic synchronization active"));
+        }
 
-        syncRunnable = new Runnable() {
-            @Override
-            public void run() {
-                syncWallet();
-                handler.postDelayed(this, 60_000);
-            }
-        };
-        handler.post(syncRunnable);
+        scheduleNextSync(0);
+    }
+
+    private void scheduleNextSync(long delayMillis) {
+        handler.postDelayed(this::syncWallet, delayMillis);
     }
 
     private void syncWallet() {
@@ -50,17 +53,18 @@ public class BackgroundSyncService extends Service {
             stopSelf();
             return;
         }
+        if (isSyncing) return;
 
+        isSyncing = true;
         updateNotification("Synchronizing...");
 
         operations.refreshBalance(
-                null,
+                this::updateNotification,
                 (success, message) -> {
-                    if (success) {
-                        updateNotification(message);
-                    } else {
-                        updateNotification("Error: " + message);
-                    }
+                    isSyncing = false;
+                    updateNotification(message);
+
+                    scheduleNextSync(60_000);
                 }
         );
     }
@@ -97,14 +101,14 @@ public class BackgroundSyncService extends Service {
     }
 
     @Override
-    public int onStartCommand(Intent intent, int flags, int startId) {
-        return START_STICKY;
+    public void onDestroy() {
+        super.onDestroy();
+        handler.removeCallbacksAndMessages(null);
     }
 
     @Override
-    public void onDestroy() {
-        super.onDestroy();
-        handler.removeCallbacks(syncRunnable);
+    public int onStartCommand(Intent intent, int flags, int startId) {
+        return START_STICKY;
     }
 
     @Override

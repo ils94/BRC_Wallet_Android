@@ -10,10 +10,6 @@ import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
-/**
- * Executa operações de carteira em background: sincronização e envio.
- * Todos os callbacks são disparados na main thread.
- */
 public class WalletOperations {
 
     public interface ProgressCallback {
@@ -36,9 +32,6 @@ public class WalletOperations {
         this.api = api;
     }
 
-    /**
-     * Sincroniza o saldo a partir do servidor.
-     */
     public void refreshBalance(ProgressCallback progressCallback, CompletionCallback doneCallback) {
         if (!store.hasWallet()) {
             postCompletion(doneCallback, false, context.getString(R.string.toast_no_wallet));
@@ -71,21 +64,13 @@ public class WalletOperations {
                 postCompletion(doneCallback, true,
                         context.getString(R.string.status_synced_to, state.height));
             } catch (Exception e) {
+                store.saveSyncState(state.height, state.balanceWei, state.nonce);
                 postCompletion(doneCallback, false,
                         context.getString(R.string.status_sync_error, e.getMessage()));
             }
         });
     }
 
-    /**
-     * Envia uma transação.
-     *
-     * @param to           endereço destino (32 bytes)
-     * @param amountWei    quantidade em wei
-     * @param feeWei       taxa em wei (deve ser >= TxBuilder.MIN_FEE)
-     * @param password     senha da carteira
-     * @param doneCallback chamado ao final com sucesso/erro
-     */
     public void sendTransaction(byte[] to, long amountWei, long feeWei, String password, CompletionCallback doneCallback) {
         final byte[] priv;
         try {
@@ -103,7 +88,6 @@ public class WalletOperations {
                 state.balanceWei = store.getBalanceWei();
                 state.nonce = store.getNonce();
 
-                // Sincroniza antes de enviar (garante nonce/saldo atualizados)
                 ChainSync.sync(api, pub, state, null, null);
                 store.saveSyncState(state.height, state.balanceWei, state.nonce);
 
@@ -131,8 +115,6 @@ public class WalletOperations {
             }
         });
     }
-
-    // ---------- Helpers para main thread ----------
 
     private void postProgress(ProgressCallback callback, String message) {
         if (callback != null) {
