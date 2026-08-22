@@ -105,6 +105,11 @@ public class DialogManager {
         edtPassword.setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_VARIATION_PASSWORD);
         layout.addView(edtPassword);
 
+        EditText edtConfirm = new EditText(context);
+        edtConfirm.setHint(context.getString(R.string.hint_confirm_password));
+        edtConfirm.setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_VARIATION_PASSWORD);
+        layout.addView(edtConfirm);
+
         new AlertDialog.Builder(context)
                 .setTitle(context.getString(R.string.dialog_import_title))
                 .setView(layout)
@@ -112,9 +117,14 @@ public class DialogManager {
                 .setPositiveButton(context.getString(R.string.button_import), (d, w) -> {
                     String inputText = edtInput.getText().toString().trim();
                     String pwd = edtPassword.getText().toString();
+                    String confirmPwd = edtConfirm.getText().toString();
 
                     if (pwd.isEmpty()) {
                         toast(context.getString(R.string.toast_set_password_required));
+                        return;
+                    }
+                    if (!pwd.equals(confirmPwd)) {
+                        toast(context.getString(R.string.toast_passwords_do_not_match));
                         return;
                     }
 
@@ -216,8 +226,7 @@ public class DialogManager {
                     return;
                 }
 
-                // Taxa opcional
-                long feeWei = TxBuilder.MIN_FEE; // padrão
+                long feeWei = TxBuilder.MIN_FEE;
                 String feeText = edtFee.getText().toString().trim();
                 if (!feeText.isEmpty()) {
                     feeWei = TxBuilder.brcToWei(feeText);
