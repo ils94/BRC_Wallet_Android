@@ -53,7 +53,7 @@
     <string name="toast_no_wallet">Aucun portefeuille créé.</string>
 
     <string name="dialog_change_server_title">URL du serveur helper</string>
-    <string name="hint_server_url">http://exemple.com:9000</string>
+    <string name="hint_server_url">URLs des serveurs séparées par des virgules</string>
     <string name="button_save">Enregistrer</string>
     <string name="toast_server_updated">Serveur mis à jour !</string>
 

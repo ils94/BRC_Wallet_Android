@@ -159,7 +159,7 @@ public final class WalletStore {
     }
 
     public String getApiBase() {
-        return prefs.getString(KEY_API, "https://api1.browsercoin.org");
+        return prefs.getString(KEY_API, "https://api1.browsercoin.org,https://api2.browsercoin.org,https://api1.taitech.eu,https://brc-api.solodragonsden.fun");
     }
 
     public void setApiBase(String url) {

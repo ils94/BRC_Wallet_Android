@@ -14,7 +14,6 @@ import okhttp3.Request;
 import okhttp3.RequestBody;
 import okhttp3.Response;
 
-
 public final class BRCApi {
 
     private static final MediaType JSON = MediaType.get("application/json");
@@ -24,15 +23,51 @@ public final class BRCApi {
             .readTimeout(60, TimeUnit.SECONDS)
             .build();
 
-    private String baseUrl;
+    private List<String> baseUrls;
+    private int currentIndex;
 
     public BRCApi(String baseUrl) {
-        setBaseUrl(baseUrl);
+        setBaseUrls(baseUrl);
     }
 
     public void setBaseUrl(String baseUrl) {
-        if (baseUrl.endsWith("/")) baseUrl = baseUrl.substring(0, baseUrl.length() - 1);
-        this.baseUrl = baseUrl;
+        setBaseUrls(baseUrl);
+    }
+
+    public void setBaseUrls(String urls) {
+        if (urls == null || urls.trim().isEmpty()) {
+            urls = "http://10.0.2.2:9000";
+        }
+
+        String[] parts = urls.split(",");
+        List<String> normalized = new ArrayList<>();
+        for (String part : parts) {
+            String trimmed = part.trim();
+            if (trimmed.isEmpty()) continue;
+            if (trimmed.endsWith("/")) {
+                trimmed = trimmed.substring(0, trimmed.length() - 1);
+            }
+            normalized.add(trimmed);
+        }
+
+        if (normalized.isEmpty()) {
+            normalized.add("http://10.0.2.2:9000");
+        }
+
+        this.baseUrls = normalized;
+        this.currentIndex = 0;
+    }
+
+    public String getCurrentBaseUrl() {
+        return baseUrls.get(currentIndex);
+    }
+
+    private void nextBaseUrl() {
+        currentIndex = (currentIndex + 1) % baseUrls.size();
+    }
+
+    private void resetBaseUrl() {
+        currentIndex = 0;
     }
 
     public static final class Tip {
@@ -46,6 +81,23 @@ public final class BRCApi {
     }
 
     public Tip getTip() throws IOException {
+        int attempts = 0;
+        IOException lastError = null;
+        while (attempts < baseUrls.size()) {
+            String url = getCurrentBaseUrl();
+            try {
+                return getTipFrom(url);
+            } catch (IOException e) {
+                lastError = e;
+                nextBaseUrl();
+                attempts++;
+            }
+        }
+        resetBaseUrl();
+        throw lastError != null ? lastError : new IOException("All servers failed");
+    }
+
+    private Tip getTipFrom(String baseUrl) throws IOException {
         try (Response r = http.newCall(new Request.Builder().url(baseUrl + "/tip").build()).execute()) {
             if (!r.isSuccessful()) throw new IOException("GET /tip HTTP " + r.code());
             assert r.body() != null;
@@ -57,6 +109,23 @@ public final class BRCApi {
     }
 
     public List<byte[]> getBlocks(long fromHeight, int max) throws IOException {
+        int attempts = 0;
+        IOException lastError = null;
+        while (attempts < baseUrls.size()) {
+            String url = getCurrentBaseUrl();
+            try {
+                return getBlocksFrom(url, fromHeight, max);
+            } catch (IOException e) {
+                lastError = e;
+                nextBaseUrl();
+                attempts++;
+            }
+        }
+        resetBaseUrl();
+        throw lastError != null ? lastError : new IOException("All servers failed");
+    }
+
+    private List<byte[]> getBlocksFrom(String baseUrl, long fromHeight, int max) throws IOException {
         String url = baseUrl + "/blocks?fromHeight=" + fromHeight + "&max=" + max;
         try (Response r = http.newCall(new Request.Builder().url(url).build()).execute()) {
             if (!r.isSuccessful()) throw new IOException("GET /blocks HTTP " + r.code());
@@ -86,6 +155,23 @@ public final class BRCApi {
     }
 
     public SubmitResult submitTxs(List<String> txHexList) throws IOException {
+        int attempts = 0;
+        IOException lastError = null;
+        while (attempts < baseUrls.size()) {
+            String url = getCurrentBaseUrl();
+            try {
+                return submitTxsTo(url, txHexList);
+            } catch (IOException e) {
+                lastError = e;
+                nextBaseUrl();
+                attempts++;
+            }
+        }
+        resetBaseUrl();
+        throw lastError != null ? lastError : new IOException("All servers failed");
+    }
+
+    private SubmitResult submitTxsTo(String baseUrl, List<String> txHexList) throws IOException {
         try {
             JSONArray txs = new JSONArray();
             for (String h : txHexList) txs.put(h);
