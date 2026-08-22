@@ -61,8 +61,9 @@ public class WalletOperations {
         final boolean firstSync = (state.height < 0);
 
         io.execute(() -> {
+            List<TxRecord> history = new ArrayList<>();
+
             try {
-                List<TxRecord> history = new ArrayList<>();
                 postProgress(progressCallback, context.getString(R.string.status_syncing));
 
                 ChainSync.sync(api, pub, state,
@@ -80,6 +81,7 @@ public class WalletOperations {
                 postCompletion(doneCallback, true,
                         context.getString(R.string.status_synced_to, state.height));
             } catch (Exception e) {
+                store.saveHistory(history);
                 store.saveSyncState(state.height, state.balanceWei, state.nonce);
                 postCompletion(doneCallback, false,
                         context.getString(R.string.status_sync_error, e.getMessage()));
