@@ -90,7 +90,7 @@ public class BackgroundSyncService extends Service {
                 + "Amount: " + amount;
 
         Notification notification = new NotificationCompat.Builder(this, CHANNEL_ID_TX)
-                .setSmallIcon(R.mipmap.ic_launcher)
+                .setSmallIcon(R.mipmap.ic_launcher_round_monochrome)
                 .setContentTitle("Incoming BRC")
                 .setContentText("You received " + amount)
                 .setStyle(new NotificationCompat.BigTextStyle().bigText(details))
@@ -132,7 +132,7 @@ public class BackgroundSyncService extends Service {
 
     private Notification buildNotification(String text) {
         return new NotificationCompat.Builder(this, CHANNEL_ID)
-                .setSmallIcon(R.mipmap.ic_launcher)
+                .setSmallIcon(R.mipmap.ic_launcher_round_monochrome)
                 .setContentTitle("BRC Wallet")
                 .setContentText(text)
                 .setContentIntent(getMainActivityPendingIntent())
