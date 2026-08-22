@@ -20,6 +20,10 @@ public class WalletOperations {
         void onComplete(boolean success, String message);
     }
 
+    public interface HistoryCallback {
+        void onNewHistory(List<TxRecord> newTxs, boolean isFirstSync);
+    }
+
     private final ExecutorService io = Executors.newSingleThreadExecutor();
     private final WalletStore store;
     private final BRCApi api;
@@ -33,6 +37,12 @@ public class WalletOperations {
     }
 
     public void refreshBalance(ProgressCallback progressCallback, CompletionCallback doneCallback) {
+        refreshBalance(progressCallback, doneCallback, null);
+    }
+
+    public void refreshBalance(ProgressCallback progressCallback,
+                               CompletionCallback doneCallback,
+                               HistoryCallback historyCallback) {
         if (!store.hasWallet()) {
             postCompletion(doneCallback, false, context.getString(R.string.toast_no_wallet));
             return;
@@ -48,6 +58,8 @@ public class WalletOperations {
         state.balanceWei = store.getBalanceWei();
         state.nonce = store.getNonce();
 
+        final boolean firstSync = (state.height < 0);
+
         io.execute(() -> {
             try {
                 List<TxRecord> history = new ArrayList<>();
@@ -60,6 +72,10 @@ public class WalletOperations {
 
                 store.saveHistory(history);
                 store.saveSyncState(state.height, state.balanceWei, state.nonce);
+
+                if (historyCallback != null) {
+                    mainHandler.post(() -> historyCallback.onNewHistory(history, firstSync));
+                }
 
                 postCompletion(doneCallback, true,
                         context.getString(R.string.status_synced_to, state.height));

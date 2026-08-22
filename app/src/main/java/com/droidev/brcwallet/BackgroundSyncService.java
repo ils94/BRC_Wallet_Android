@@ -13,10 +13,14 @@ import android.os.Looper;
 
 import androidx.core.app.NotificationCompat;
 
+import java.util.List;
+
 public class BackgroundSyncService extends Service {
 
     private static final String CHANNEL_ID = "brc_wallet_sync";
+    private static final String CHANNEL_ID_TX = "brc_wallet_tx";
     private static final int NOTIFICATION_ID = 1001;
+    private static final int TX_NOTIFICATION_BASE_ID = 2000;
 
     private Handler handler;
     private WalletOperations operations;
@@ -32,7 +36,7 @@ public class BackgroundSyncService extends Service {
         operations = new WalletOperations(this, store, api);
         handler = new Handler(Looper.getMainLooper());
 
-        createNotificationChannel();
+        createNotificationChannels();
 
         if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.Q) {
             startForeground(NOTIFICATION_ID, buildNotification("Automatic synchronization active"),
@@ -63,33 +67,75 @@ public class BackgroundSyncService extends Service {
                 (success, message) -> {
                     isSyncing = false;
                     updateNotification(message);
-
                     scheduleNextSync(60_000);
-                }
+                },
+                this::handleNewTransactions
         );
     }
 
-    private void createNotificationChannel() {
-        NotificationChannel channel = new NotificationChannel(
+    private void handleNewTransactions(List<TxRecord> txs, boolean isFirstSync) {
+        if (isFirstSync || txs == null || txs.isEmpty()) return;
+
+        for (TxRecord tx : txs) {
+            if (tx.type == TxRecord.Type.RECEIVE && tx.amountWei > 0) {
+                showIncomingTxNotification(tx);
+            }
+        }
+    }
+
+    private void showIncomingTxNotification(TxRecord tx) {
+        String amount = TxBuilder.weiToBrc(tx.amountWei);
+        String details = "Block: " + tx.blockHeight + "\n"
+                + "From: " + (tx.from.isEmpty() ? "unknown" : tx.from) + "\n"
+                + "Amount: " + amount;
+
+        Notification notification = new NotificationCompat.Builder(this, CHANNEL_ID_TX)
+                .setSmallIcon(R.mipmap.ic_launcher)
+                .setContentTitle("Incoming BRC")
+                .setContentText("You received " + amount)
+                .setStyle(new NotificationCompat.BigTextStyle().bigText(details))
+                .setPriority(NotificationCompat.PRIORITY_HIGH)
+                .setAutoCancel(true)
+                .setContentIntent(getMainActivityPendingIntent())
+                .build();
+
+        NotificationManager manager = getSystemService(NotificationManager.class);
+        int notificationId = TX_NOTIFICATION_BASE_ID + (int) tx.blockHeight;
+        manager.notify(notificationId, notification);
+    }
+
+    private PendingIntent getMainActivityPendingIntent() {
+        Intent intent = new Intent(this, MainActivity.class);
+        return PendingIntent.getActivity(
+                this, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE);
+    }
+
+    private void createNotificationChannels() {
+        NotificationChannel syncChannel = new NotificationChannel(
                 CHANNEL_ID,
                 "Automatic synchronization",
                 NotificationManager.IMPORTANCE_LOW
         );
-        channel.setDescription("Keeps balance and history up to date");
+        syncChannel.setDescription("Keeps balance and history up to date");
+
+        NotificationChannel txChannel = new NotificationChannel(
+                CHANNEL_ID_TX,
+                "Incoming transactions",
+                NotificationManager.IMPORTANCE_HIGH
+        );
+        txChannel.setDescription("Notifications for received BRC");
+
         NotificationManager manager = getSystemService(NotificationManager.class);
-        manager.createNotificationChannel(channel);
+        manager.createNotificationChannel(syncChannel);
+        manager.createNotificationChannel(txChannel);
     }
 
     private Notification buildNotification(String text) {
-        Intent intent = new Intent(this, MainActivity.class);
-        PendingIntent pendingIntent = PendingIntent.getActivity(
-                this, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE);
-
         return new NotificationCompat.Builder(this, CHANNEL_ID)
                 .setSmallIcon(R.mipmap.ic_launcher)
                 .setContentTitle("BRC Wallet")
                 .setContentText(text)
-                .setContentIntent(pendingIntent)
+                .setContentIntent(getMainActivityPendingIntent())
                 .setOngoing(true)
                 .setOnlyAlertOnce(true)
                 .build();
