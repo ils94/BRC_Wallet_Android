@@ -28,7 +28,7 @@ public class DialogManager {
 
         void onHeightSet(long height);
 
-        void onSendRequested(byte[] to, long amountWei, String password);
+        void onSendRequested(byte[] to, long amountWei, long feeWei, String password);
     }
 
     private final Context context;
@@ -159,7 +159,6 @@ public class DialogManager {
                 .setPositiveButton(context.getString(R.string.button_ok), (d, w) -> {
                     try {
                         byte[] priv = store.loadPrivateKey(input.getText().toString());
-                        // Chama o callback para abrir a ExportActivity
                         callback.onWalletExported(priv);
                     } catch (Exception e) {
                         toast(context.getString(R.string.toast_wrong_password));
@@ -178,6 +177,7 @@ public class DialogManager {
         @SuppressLint("InflateParams") View view = LayoutInflater.from(context).inflate(R.layout.dialog_send, null);
         EditText edtTo = view.findViewById(R.id.edtTo);
         EditText edtAmount = view.findViewById(R.id.edtAmount);
+        EditText edtFee = view.findViewById(R.id.edtFee);
         EditText edtPassword = view.findViewById(R.id.edtPassword);
         Button btnScan = view.findViewById(R.id.btnScan);
         Button btnSend = view.findViewById(R.id.btnSend);
@@ -215,8 +215,19 @@ public class DialogManager {
                     toast(context.getString(R.string.toast_enter_password_to_send));
                     return;
                 }
+
+                // Taxa opcional
+                long feeWei = TxBuilder.MIN_FEE; // padrão
+                String feeText = edtFee.getText().toString().trim();
+                if (!feeText.isEmpty()) {
+                    feeWei = TxBuilder.brcToWei(feeText);
+                    if (feeWei < TxBuilder.MIN_FEE) {
+                        throw new IllegalArgumentException(context.getString(R.string.toast_invalid_fee));
+                    }
+                }
+
                 dialog.dismiss();
-                callback.onSendRequested(to, amountWei, password);
+                callback.onSendRequested(to, amountWei, feeWei, password);
             } catch (Exception e) {
                 toast(context.getString(R.string.toast_invalid_data, e.getMessage()));
             }

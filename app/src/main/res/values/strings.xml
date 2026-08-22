@@ -119,4 +119,7 @@
     <string name="clipboard_label_mnemonic">Mnemonic phrase</string>
     <string name="toast_copied">Copied to clipboard!</string>
     <string name="export_warning">Never share your private key or mnemonic with anyone!</string>
+
+    <string name="hint_fee_brc">Fee (BRC) - optional</string>
+    <string name="toast_invalid_fee">Invalid fee</string>
 </resources>

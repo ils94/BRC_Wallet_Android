@@ -119,4 +119,7 @@
     <string name="clipboard_label_mnemonic">Frase mnemónica</string>
     <string name="toast_copied">¡Copiado al portapapeles!</string>
     <string name="export_warning">¡Nunca comparta su clave privada o frase mnemónica con nadie!</string>
+
+    <string name="hint_fee_brc">Comisión (BRC) - opcional</string>
+    <string name="toast_invalid_fee">Comisión inválida</string>
 </resources>

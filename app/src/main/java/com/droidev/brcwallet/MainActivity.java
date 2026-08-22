@@ -149,9 +149,9 @@ public class MainActivity extends AppCompatActivity implements DialogManager.Wal
     }
 
     @Override
-    public void onSendRequested(byte[] to, long amountWei, String password) {
+    public void onSendRequested(byte[] to, long amountWei, long feeWei, String password) {
         setStatus(getString(R.string.status_sending));
-        operations.sendTransaction(to, amountWei, password, (success, message) -> {
+        operations.sendTransaction(to, amountWei, feeWei, password, (success, message) -> {
             if (success) {
                 toast(message);
                 updateUi();
@@ -169,8 +169,6 @@ public class MainActivity extends AppCompatActivity implements DialogManager.Wal
                     tempEdtTo = null;
                 }
             });
-
-
 
     @Override
     public void startScan(EditText targetField) {

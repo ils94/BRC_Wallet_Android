@@ -10,6 +10,10 @@ import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
+/**
+ * Executa operações de carteira em background: sincronização e envio.
+ * Todos os callbacks são disparados na main thread.
+ */
 public class WalletOperations {
 
     public interface ProgressCallback {
@@ -24,7 +28,6 @@ public class WalletOperations {
     private final WalletStore store;
     private final BRCApi api;
     private final Context context;
-
     private final Handler mainHandler = new Handler(Looper.getMainLooper());
 
     public WalletOperations(Context context, WalletStore store, BRCApi api) {
@@ -33,6 +36,9 @@ public class WalletOperations {
         this.api = api;
     }
 
+    /**
+     * Sincroniza o saldo a partir do servidor.
+     */
     public void refreshBalance(ProgressCallback progressCallback, CompletionCallback doneCallback) {
         if (!store.hasWallet()) {
             postCompletion(doneCallback, false, context.getString(R.string.toast_no_wallet));
@@ -71,8 +77,16 @@ public class WalletOperations {
         });
     }
 
-    public void sendTransaction(byte[] to, long amountWei, String password, CompletionCallback doneCallback) {
-        final long fee = TxBuilder.MIN_FEE;
+    /**
+     * Envia uma transação.
+     *
+     * @param to           endereço destino (32 bytes)
+     * @param amountWei    quantidade em wei
+     * @param feeWei       taxa em wei (deve ser >= TxBuilder.MIN_FEE)
+     * @param password     senha da carteira
+     * @param doneCallback chamado ao final com sucesso/erro
+     */
+    public void sendTransaction(byte[] to, long amountWei, long feeWei, String password, CompletionCallback doneCallback) {
         final byte[] priv;
         try {
             priv = store.loadPrivateKey(password);
@@ -89,24 +103,24 @@ public class WalletOperations {
                 state.balanceWei = store.getBalanceWei();
                 state.nonce = store.getNonce();
 
+                // Sincroniza antes de enviar (garante nonce/saldo atualizados)
                 ChainSync.sync(api, pub, state, null, null);
                 store.saveSyncState(state.height, state.balanceWei, state.nonce);
 
-                if (state.balanceWei < amountWei + fee) {
+                if (state.balanceWei < amountWei + feeWei) {
                     postCompletion(doneCallback, false,
                             context.getString(R.string.status_insufficient_balance,
                                     TxBuilder.weiToBrc(state.balanceWei)));
                     return;
                 }
 
-                byte[] tx = TxBuilder.buildSignedTransfer(priv, to, amountWei, fee, state.nonce);
+                byte[] tx = TxBuilder.buildSignedTransfer(priv, to, amountWei, feeWei, state.nonce);
                 BRCApi.SubmitResult res = api.submitTxs(
                         Collections.singletonList(TxBuilder.toHex(tx)));
 
                 if (res.ok()) {
                     store.saveSyncState(state.height, state.balanceWei, state.nonce + 1);
-                    postCompletion(doneCallback, true,
-                            context.getString(R.string.status_tx_admitted));
+                    postCompletion(doneCallback, true, context.getString(R.string.status_tx_admitted));
                 } else {
                     postCompletion(doneCallback, false,
                             context.getString(R.string.status_tx_rejected, res.errors));
@@ -117,6 +131,8 @@ public class WalletOperations {
             }
         });
     }
+
+    // ---------- Helpers para main thread ----------
 
     private void postProgress(ProgressCallback callback, String message) {
         if (callback != null) {
