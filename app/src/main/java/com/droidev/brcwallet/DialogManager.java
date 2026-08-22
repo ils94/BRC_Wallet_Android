@@ -198,7 +198,6 @@ public class DialogManager {
         }
 
         btnScan.setOnClickListener(v -> {
-            dialog.dismiss();
             if (scanCallback != null) {
                 scanCallback.startScan(edtTo);
             }
