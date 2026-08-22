@@ -22,10 +22,16 @@ public class BackgroundSyncService extends Service {
     private static final int NOTIFICATION_ID = 1001;
     private static final int TX_NOTIFICATION_BASE_ID = 2000;
 
+    private static final long SYNC_INTERVAL_MS = 60_000;
+    private static final long SYNC_TIMEOUT_MS = 120_000;
+
     private Handler handler;
     private WalletOperations operations;
     private WalletStore store;
     private boolean isSyncing = false;
+    private long syncGeneration = 0;
+
+    private Runnable watchdogRunnable;
 
     @Override
     public void onCreate() {
@@ -49,7 +55,7 @@ public class BackgroundSyncService extends Service {
     }
 
     private void scheduleNextSync(long delayMillis) {
-        handler.postDelayed(this::syncWallet, delayMillis);
+        handler.postDelayed(() -> syncWallet(), delayMillis);
     }
 
     private void syncWallet() {
@@ -59,17 +65,37 @@ public class BackgroundSyncService extends Service {
         }
         if (isSyncing) return;
 
+        long currentGen = ++syncGeneration;
         isSyncing = true;
         updateNotification("Synchronizing...");
 
+        watchdogRunnable = () -> {
+            if (currentGen == syncGeneration && isSyncing) {
+                isSyncing = false;
+                updateNotification("Sync timeout, retrying...");
+                scheduleNextSync(1000);
+            }
+        };
+        handler.postDelayed(watchdogRunnable, SYNC_TIMEOUT_MS);
+
         operations.refreshBalance(
-                this::updateNotification,
+                progressMessage -> {
+                    if (currentGen == syncGeneration) {
+                        updateNotification(progressMessage);
+                    }
+                },
                 (success, message) -> {
+                    if (currentGen != syncGeneration) return;
+                    handler.removeCallbacks(watchdogRunnable);
                     isSyncing = false;
                     updateNotification(message);
-                    scheduleNextSync(60_000);
+                    scheduleNextSync(SYNC_INTERVAL_MS);
                 },
-                this::handleNewTransactions
+                (newTxs, isFirstSync) -> {
+                    if (currentGen == syncGeneration) {
+                        handleNewTransactions(newTxs, isFirstSync);
+                    }
+                }
         );
     }
 
