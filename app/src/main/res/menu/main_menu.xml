@@ -58,6 +58,14 @@
                 android:id="@+id/action_set_height"
                 android:title="@string/menu_sync_height"
                 app:showAsAction="never" />
+            <item
+                android:id="@+id/action_start_sync"
+                android:title="@string/menu_start_sync"
+                app:showAsAction="never" />
+            <item
+                android:id="@+id/action_stop_sync"
+                android:title="@string/menu_stop_sync"
+                app:showAsAction="never" />
         </menu>
     </item>
 

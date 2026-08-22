@@ -122,4 +122,11 @@
 
     <string name="hint_fee_brc">Gebühr (BRC) - optional</string>
     <string name="toast_invalid_fee">Ungültige Gebühr</string>
+
+    <string name="menu_start_sync">Automatische Synchronisierung starten</string>
+    <string name="menu_stop_sync">Automatische Synchronisierung stoppen</string>
+
+    <string name="toast_notification_permission_denied">Benachrichtigungsberechtigung verweigert. Der Dienst wird nicht gestartet.</string>
+    <string name="toast_sync_started">Automatische Synchronisierung gestartet</string>
+    <string name="toast_sync_stopped">Automatische Synchronisierung gestoppt</string>
 </resources>

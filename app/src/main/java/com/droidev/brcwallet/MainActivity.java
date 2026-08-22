@@ -4,6 +4,7 @@ import android.content.ClipData;
 import android.content.ClipboardManager;
 import android.content.Context;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.Color;
 import android.os.Bundle;
@@ -17,6 +18,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.app.AppCompatDelegate;
 import androidx.core.graphics.Insets;
@@ -42,6 +44,15 @@ public class MainActivity extends AppCompatActivity implements DialogManager.Wal
     private Button btnCopy, btnShare;
 
     private EditText tempEdtTo;
+    
+    private final ActivityResultLauncher<String> notificationPermissionLauncher =
+            registerForActivityResult(new ActivityResultContracts.RequestPermission(), granted -> {
+                if (granted) {
+                    startSyncService();
+                } else {
+                    toast(getString(R.string.toast_notification_permission_denied));
+                }
+            });
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -112,6 +123,12 @@ public class MainActivity extends AppCompatActivity implements DialogManager.Wal
             return true;
         } else if (id == R.id.action_history) {
             startActivity(new Intent(this, HistoryActivity.class));
+            return true;
+        } else if (id == R.id.action_start_sync) {
+            startBackgroundSync();
+            return true;
+        } else if (id == R.id.action_stop_sync) {
+            stopBackgroundSync();
             return true;
         }
         return super.onOptionsItemSelected(item);
@@ -266,5 +283,34 @@ public class MainActivity extends AppCompatActivity implements DialogManager.Wal
 
     private void toast(String message) {
         runOnUiThread(() -> Toast.makeText(this, message, Toast.LENGTH_LONG).show());
+    }
+
+    private void startBackgroundSync() {
+        if (!store.hasWallet()) {
+            toast(getString(R.string.toast_no_wallet));
+            return;
+        }
+
+        if (android.os.Build.VERSION.SDK_INT >= 33) {
+            if (checkSelfPermission(android.Manifest.permission.POST_NOTIFICATIONS)
+                    != PackageManager.PERMISSION_GRANTED) {
+                notificationPermissionLauncher.launch(android.Manifest.permission.POST_NOTIFICATIONS);
+                return;
+            }
+        }
+
+        startSyncService();
+    }
+
+    private void startSyncService() {
+        Intent serviceIntent = new Intent(this, BackgroundSyncService.class);
+        startForegroundService(serviceIntent);
+        toast(getString(R.string.toast_sync_started));
+    }
+
+    private void stopBackgroundSync() {
+        Intent serviceIntent = new Intent(this, BackgroundSyncService.class);
+        stopService(serviceIntent);
+        toast(getString(R.string.toast_sync_stopped));
     }
 }

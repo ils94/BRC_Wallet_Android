@@ -122,4 +122,11 @@
 
     <string name="hint_fee_brc">Fee (BRC) - optional</string>
     <string name="toast_invalid_fee">Invalid fee</string>
+
+    <string name="menu_start_sync">Start automatic synchronization</string>
+    <string name="menu_stop_sync">Stop automatic synchronization</string>
+
+    <string name="toast_notification_permission_denied">Notification permission denied. The service will not be started.</string>
+    <string name="toast_sync_started">Automatic synchronization started</string>
+    <string name="toast_sync_stopped">Automatic synchronization stopped</string>
 </resources>
