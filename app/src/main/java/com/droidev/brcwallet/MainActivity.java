@@ -43,6 +43,13 @@ import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
+import org.bitcoinj.crypto.MnemonicCode;
+import org.bitcoinj.crypto.MnemonicException;
+
+import java.util.Arrays;
+import java.util.List;
+import java.util.regex.Pattern;
+
 public class MainActivity extends AppCompatActivity {
 
     private WalletStore store;
@@ -55,6 +62,8 @@ public class MainActivity extends AppCompatActivity {
     private Button btnShare;
 
     private EditText tempEdtTo;
+
+    private static final Pattern HEX_PATTERN = Pattern.compile("^[0-9a-fA-F]{64}$");
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -183,10 +192,10 @@ public class MainActivity extends AppCompatActivity {
         layout.setOrientation(LinearLayout.VERTICAL);
         layout.setPadding(48, 16, 48, 16);
 
-        EditText edtPrivateKey = new EditText(this);
-        edtPrivateKey.setHint(getString(R.string.hint_private_key));
-        edtPrivateKey.setInputType(InputType.TYPE_CLASS_TEXT);
-        layout.addView(edtPrivateKey);
+        EditText edtInput = new EditText(this);
+        edtInput.setHint(getString(R.string.hint_import_input));
+        edtInput.setInputType(InputType.TYPE_CLASS_TEXT);
+        layout.addView(edtInput);
 
         EditText edtPassword = new EditText(this);
         edtPassword.setHint(getString(R.string.hint_set_wallet_password));
@@ -198,14 +207,27 @@ public class MainActivity extends AppCompatActivity {
                 .setView(layout)
                 .setCancelable(false)
                 .setPositiveButton(getString(R.string.button_import), (d, w) -> {
+                    String inputText = edtInput.getText().toString().trim();
+                    String pwd = edtPassword.getText().toString();
+
+                    if (pwd.isEmpty()) {
+                        toast(getString(R.string.toast_set_password_required));
+                        return;
+                    }
+
+                    byte[] priv = null;
                     try {
-                        byte[] priv = TxBuilder.fromHex(edtPrivateKey.getText().toString());
-                        if (priv.length != 32)
-                            throw new IllegalArgumentException(getString(R.string.error_private_key_length));
-                        String pwd = edtPassword.getText().toString();
-                        if (pwd.isEmpty()) {
-                            toast(getString(R.string.toast_set_password_required));
-                            return;
+                        if (isHexPrivateKey(inputText)) {
+                            priv = TxBuilder.fromHex(inputText);
+                            if (priv.length != 32) {
+                                throw new IllegalArgumentException(getString(R.string.error_private_key_length));
+                            }
+                        } else {
+                            // Interpreta como seed phrase
+                            priv = mnemonicToEntropy(inputText);
+                            if (priv.length != 32) {
+                                throw new IllegalArgumentException(getString(R.string.error_private_key_length));
+                            }
                         }
                         store.savePrivateKey(priv, pwd);
                         store.saveSyncState(-1, 0, 0);
@@ -236,12 +258,36 @@ public class MainActivity extends AppCompatActivity {
                 .setPositiveButton(getString(R.string.button_ok), (d, w) -> {
                     try {
                         byte[] priv = store.loadPrivateKey(input.getText().toString());
-                        showPrivateKeyDialog(priv);
+                        showExportFormatDialog(priv);
                     } catch (Exception e) {
                         toast(getString(R.string.toast_wrong_password));
                     }
                 })
                 .setNegativeButton(getString(R.string.button_cancel), null)
+                .show();
+    }
+
+    private void showExportFormatDialog(byte[] priv) {
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setTitle(getString(R.string.dialog_export_format_title))
+                .setCancelable(false)
+                .setPositiveButton(getString(R.string.button_private_key), (d, w) -> {
+                    showPrivateKeyDialog(priv);
+                })
+                .setNegativeButton(getString(R.string.button_mnemonic), (d, w) -> {
+                    String mnemonic = entropyToMnemonic(priv);
+                    showMnemonicDialog(mnemonic);
+                })
+                .setNeutralButton(getString(R.string.button_cancel), null)
+                .show();
+    }
+
+    private void showMnemonicDialog(String mnemonic) {
+        new AlertDialog.Builder(this)
+                .setTitle(getString(R.string.dialog_mnemonic_title))
+                .setMessage(mnemonic)
+                .setPositiveButton(getString(R.string.button_ok), null)
+                .setCancelable(false)
                 .show();
     }
 
@@ -541,5 +587,27 @@ public class MainActivity extends AppCompatActivity {
                 })
                 .setNegativeButton(getString(R.string.button_cancel), null)
                 .show();
+    }
+
+    private boolean isHexPrivateKey(String input) {
+        return HEX_PATTERN.matcher(input).matches();
+    }
+
+    private byte[] mnemonicToEntropy(String mnemonic) throws Exception {
+        try {
+            List<String> words = Arrays.asList(mnemonic.trim().split("\\s+"));
+            return MnemonicCode.INSTANCE.toEntropy(words);
+        } catch (MnemonicException e) {
+            throw new Exception(getString(R.string.toast_invalid_mnemonic));
+        }
+    }
+
+    private String entropyToMnemonic(byte[] entropy) {
+        try {
+            List<String> words = MnemonicCode.INSTANCE.toMnemonic(entropy);
+            return String.join(" ", words);
+        } catch (MnemonicException e) {
+            return "";
+        }
     }
 }

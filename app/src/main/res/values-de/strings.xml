@@ -106,4 +106,12 @@
     <string name="tx_type_redeem">🔓 Redeem</string>
     <string name="tx_details_format">Block %1$d\nVon: %2$s\nAn: %3$s\nWert: %4$s%5$s</string>
     <string name="tx_fee_suffix"> | Gebühr: %1$s</string>
+
+    <!-- Import / Export BIP39 -->
+    <string name="hint_import_input">Privater Schlüssel (64 Hex) oder mnemonische Seed-Phrase</string>
+    <string name="toast_invalid_mnemonic">Ungültige mnemonische Phrase</string>
+    <string name="dialog_export_format_title">Exportformat wählen</string>
+    <string name="button_private_key">Privater Schlüssel</string>
+    <string name="button_mnemonic">Mnemonische Phrase</string>
+    <string name="dialog_mnemonic_title">Mnemonische Seed-Phrase</string>
 </resources>
