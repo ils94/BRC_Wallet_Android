@@ -1,12 +1,10 @@
 package com.droidev.brcwallet;
 
 import android.annotation.SuppressLint;
-import android.app.AlertDialog;
 import android.app.Dialog;
 import android.content.Context;
 import android.os.Handler;
 import android.os.Looper;
-import android.text.InputType;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.Window;
@@ -325,46 +323,75 @@ public class DialogManager {
     }
 
     public void showChangeServerDialog() {
-        EditText input = new EditText(context);
-        input.setText(store.getApiBase());
-        input.setHint(context.getString(R.string.hint_server_url));
-        input.setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_VARIATION_URI);
+        @SuppressLint("InflateParams") View view = LayoutInflater.from(context).inflate(R.layout.dialog_change_server, null);
+        EditText edtServer = view.findViewById(R.id.edtServer);
+        Button btnSave = view.findViewById(R.id.btnSave);
+        TextView btnCancel = view.findViewById(R.id.btnCancel);
 
-        new AlertDialog.Builder(context)
-                .setTitle(context.getString(R.string.dialog_change_server_title))
-                .setView(input)
-                .setCancelable(false)
-                .setPositiveButton(context.getString(R.string.button_save), (d, w) -> {
-                    String url = input.getText().toString().trim();
-                    store.setApiBase(url);
-                    callback.onServerChanged(url);
-                })
-                .setNegativeButton(context.getString(R.string.button_cancel), null)
-                .show();
+        edtServer.setText(store.getApiBase());
+        edtServer.setSelection(edtServer.length());
+
+        Dialog dialog = new Dialog(context);
+        dialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
+        dialog.setContentView(view);
+        dialog.setCancelable(false);
+
+        Window window = dialog.getWindow();
+        if (window != null) {
+            window.setBackgroundDrawableResource(android.R.color.transparent);
+            WindowManager.LayoutParams params = window.getAttributes();
+            params.width = WindowManager.LayoutParams.MATCH_PARENT;
+            params.height = WindowManager.LayoutParams.WRAP_CONTENT;
+            window.setAttributes(params);
+        }
+
+        btnSave.setOnClickListener(v -> {
+            String url = edtServer.getText().toString().trim();
+            store.setApiBase(url);
+            callback.onServerChanged(url);
+            dialog.dismiss();
+        });
+
+        btnCancel.setOnClickListener(v -> dialog.dismiss());
+
+        dialog.show();
     }
 
     public void showSetHeightDialog() {
-        EditText input = new EditText(context);
-        input.setHint(context.getString(R.string.hint_block_height));
-        input.setInputType(InputType.TYPE_CLASS_NUMBER);
+        @SuppressLint("InflateParams") View view = LayoutInflater.from(context).inflate(R.layout.dialog_set_height, null);
+        EditText edtHeight = view.findViewById(R.id.edtHeight);
+        Button btnSet = view.findViewById(R.id.btnSet);
+        TextView btnCancel = view.findViewById(R.id.btnCancel);
 
-        new AlertDialog.Builder(context)
-                .setTitle(context.getString(R.string.dialog_set_height_title))
-                .setMessage(context.getString(R.string.dialog_set_height_message))
-                .setView(input)
-                .setCancelable(false)
-                .setPositiveButton(context.getString(R.string.button_set), (d, w) -> {
-                    try {
-                        long height = Long.parseLong(input.getText().toString());
-                        if (height < 0) throw new NumberFormatException();
-                        store.setSyncHeight(height);
-                        callback.onHeightSet(height);
-                    } catch (NumberFormatException e) {
-                        toast(context.getString(R.string.toast_invalid_height));
-                    }
-                })
-                .setNegativeButton(context.getString(R.string.button_cancel), null)
-                .show();
+        Dialog dialog = new Dialog(context);
+        dialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
+        dialog.setContentView(view);
+        dialog.setCancelable(false);
+
+        Window window = dialog.getWindow();
+        if (window != null) {
+            window.setBackgroundDrawableResource(android.R.color.transparent);
+            WindowManager.LayoutParams params = window.getAttributes();
+            params.width = WindowManager.LayoutParams.MATCH_PARENT;
+            params.height = WindowManager.LayoutParams.WRAP_CONTENT;
+            window.setAttributes(params);
+        }
+
+        btnSet.setOnClickListener(v -> {
+            try {
+                long height = Long.parseLong(edtHeight.getText().toString());
+                if (height < 0) throw new NumberFormatException();
+                store.setSyncHeight(height);
+                callback.onHeightSet(height);
+                dialog.dismiss();
+            } catch (NumberFormatException e) {
+                toast(context.getString(R.string.toast_invalid_height));
+            }
+        });
+
+        btnCancel.setOnClickListener(v -> dialog.dismiss());
+
+        dialog.show();
     }
 
     private void toast(String message) {
