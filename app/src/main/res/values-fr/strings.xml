@@ -1,9 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <!-- App -->
-    <string name="app_name">Portefeuille BRC</string>
+    <string name="app_name">BRC Wallet</string>
 
-    <!-- Activité principale -->
     <string name="label_receive_address">Adresse de réception</string>
     <string name="label_balance">Solde : %1$s</string>
     <string name="label_balance_empty">Solde : —</string>
@@ -17,7 +15,6 @@
     <string name="clipboard_label_address">Adresse BRC</string>
     <string name="qr_code_description">Code QR de l\'adresse</string>
 
-    <!-- Menu -->
     <string name="menu_wallet">Portefeuille</string>
     <string name="menu_send">Envoyer des BRC</string>
     <string name="menu_history">Historique des transactions</string>
@@ -29,7 +26,6 @@
     <string name="menu_server">Serveur</string>
     <string name="menu_sync_height">Hauteur de synchronisation</string>
 
-    <!-- Dialogues : Nouveau portefeuille -->
     <string name="dialog_new_wallet_title">Créer un nouveau portefeuille ?</string>
     <string name="dialog_new_wallet_message">Cela effacera le portefeuille actuel. Exportez d\'abord la clé privée s\'il contient un solde.</string>
     <string name="dialog_set_password_title">Définir le mot de passe du portefeuille</string>
@@ -41,7 +37,6 @@
     <string name="toast_passwords_do_not_match">Les mots de passe ne correspondent pas.</string>
     <string name="toast_wallet_created">Nouveau portefeuille créé !</string>
 
-    <!-- Dialogues : Importation -->
     <string name="dialog_import_title">Importer une clé privée</string>
     <string name="hint_private_key">Clé privée (64 hex)</string>
     <string name="hint_set_wallet_password">Définir le mot de passe du portefeuille</string>
@@ -51,20 +46,17 @@
     <string name="toast_wallet_imported">Portefeuille importé !</string>
     <string name="toast_invalid_key">Clé invalide : %1$s</string>
 
-    <!-- Dialogues : Exportation -->
     <string name="dialog_enter_password_title">Saisir le mot de passe</string>
     <string name="button_ok">OK</string>
     <string name="toast_wrong_password">Mot de passe incorrect !</string>
     <string name="dialog_private_key_title">Clé privée — gardez-la en sécurité !</string>
     <string name="toast_no_wallet">Aucun portefeuille créé.</string>
 
-    <!-- Dialogues : Changer de serveur -->
     <string name="dialog_change_server_title">URL du serveur helper</string>
     <string name="hint_server_url">http://exemple.com:9000</string>
     <string name="button_save">Enregistrer</string>
     <string name="toast_server_updated">Serveur mis à jour !</string>
 
-    <!-- Dialogues : Envoyer -->
     <string name="dialog_send_title">Envoyer des BRC</string>
     <string name="hint_recipient_address">Adresse du destinataire (64 hex)</string>
     <string name="hint_amount_brc">Montant (BRC)</string>
@@ -76,7 +68,6 @@
     <string name="error_address_length">l\'adresse doit comporter 64 caractères hexadécimaux</string>
     <string name="scan_prompt">Pointez la caméra vers le code QR</string>
 
-    <!-- Messages d\'état -->
     <string name="status_syncing">Synchronisation…</string>
     <string name="status_sync_progress">Sync : bloc %1$d / %2$d</string>
     <string name="status_synced_to">Synchronisé jusqu\'au bloc %1$d</string>
@@ -88,7 +79,6 @@
     <string name="status_tx_rejected">Rejetée : %1$s</string>
     <string name="status_send_error">Erreur d\'envoi : %1$s</string>
 
-    <!-- Dialogue : Définir la hauteur de synchronisation -->
     <string name="dialog_set_height_title">Définir la hauteur de synchronisation</string>
     <string name="dialog_set_height_message">Attention : définir une hauteur différente réinitialisera le solde et le nonce, et la synchronisation repartira de ce bloc. Utilisez uniquement si vous êtes sûr que votre portefeuille n\'a pas de transactions avant cette hauteur.</string>
     <string name="hint_block_height">Hauteur du bloc (ex. 50000)</string>
@@ -96,7 +86,6 @@
     <string name="toast_height_set">Hauteur définie à %1$d. La synchronisation redémarrera.</string>
     <string name="toast_invalid_height">Hauteur invalide.</string>
 
-    <!-- Historique -->
     <string name="history_empty">Aucune transaction enregistrée pour l\'instant.</string>
     <string name="history_title">Historique des transactions</string>
     <string name="tx_type_send">➡️ Envoyé</string>
@@ -107,7 +96,6 @@
     <string name="tx_details_format">Bloc %1$d\nDe : %2$s\nÀ : %3$s\nValeur : %4$s%5$s</string>
     <string name="tx_fee_suffix"> | Frais : %1$s</string>
 
-    <!-- Import / Export BIP39 -->
     <string name="hint_import_input">Clé privée (64 hex) ou phrase mnémonique</string>
     <string name="toast_invalid_mnemonic">Phrase mnémonique invalide</string>
     <string name="dialog_export_format_title">Choisir le format d\'exportation</string>
@@ -131,4 +119,6 @@
     <string name="toast_sync_stopped">Synchronisation automatique arrêtée</string>
 
     <string name="menu_sync">Synchronisation</string>
+
+    <string name="button_create_countdown">Attendez %1$d s…</string>
 </resources>

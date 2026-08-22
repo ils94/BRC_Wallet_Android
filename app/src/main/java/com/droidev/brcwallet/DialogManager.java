@@ -4,6 +4,8 @@ import android.annotation.SuppressLint;
 import android.app.AlertDialog;
 import android.app.Dialog;
 import android.content.Context;
+import android.os.Handler;
+import android.os.Looper;
 import android.text.InputType;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -11,7 +13,6 @@ import android.view.Window;
 import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.EditText;
-import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -42,114 +43,166 @@ public class DialogManager {
     }
 
     public void showNewWalletDialog() {
-        new AlertDialog.Builder(context)
-                .setTitle(context.getString(R.string.dialog_new_wallet_title))
-                .setMessage(context.getString(R.string.dialog_new_wallet_message))
-                .setPositiveButton(context.getString(R.string.dialog_new_wallet_title), (d, w) -> showCreateWalletPasswordDialog())
-                .setNegativeButton(context.getString(R.string.button_cancel), null)
-                .setCancelable(false)
-                .show();
+        @SuppressLint("InflateParams") View view = LayoutInflater.from(context).inflate(R.layout.dialog_new_wallet, null);
+        Button btnCreate = view.findViewById(R.id.btnCreate);
+        TextView btnCancel = view.findViewById(R.id.btnCancel);
+
+        Dialog dialog = new Dialog(context);
+        dialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
+        dialog.setContentView(view);
+        dialog.setCancelable(false);
+
+        Window window = dialog.getWindow();
+        if (window != null) {
+            window.setBackgroundDrawableResource(android.R.color.transparent);
+            WindowManager.LayoutParams params = window.getAttributes();
+            params.width = WindowManager.LayoutParams.MATCH_PARENT;
+            params.height = WindowManager.LayoutParams.WRAP_CONTENT;
+            window.setAttributes(params);
+        }
+
+        Handler handler = new Handler(Looper.getMainLooper());
+        Runnable timerRunnable = new Runnable() {
+            int countdown = 10;
+
+            @Override
+            public void run() {
+                if (countdown > 0) {
+                    btnCreate.setText(context.getString(R.string.button_create_countdown, countdown));
+                    countdown--;
+                    handler.postDelayed(this, 1000);
+                } else {
+                    btnCreate.setText(R.string.button_create);
+                    btnCreate.setEnabled(true);
+                }
+            }
+        };
+        handler.post(timerRunnable);
+
+        btnCreate.setOnClickListener(v -> {
+            handler.removeCallbacks(timerRunnable);
+            dialog.dismiss();
+            showCreateWalletPasswordDialog();
+        });
+
+        btnCancel.setOnClickListener(v -> {
+            handler.removeCallbacks(timerRunnable);
+            dialog.dismiss();
+        });
+
+        dialog.setOnDismissListener(d -> handler.removeCallbacks(timerRunnable));
+
+        dialog.show();
     }
 
     private void showCreateWalletPasswordDialog() {
-        LinearLayout layout = new LinearLayout(context);
-        layout.setOrientation(LinearLayout.VERTICAL);
-        layout.setPadding(48, 16, 48, 16);
+        @SuppressLint("InflateParams") View view = LayoutInflater.from(context).inflate(R.layout.dialog_create_wallet, null);
+        EditText edtPassword = view.findViewById(R.id.edtPassword);
+        EditText edtConfirm = view.findViewById(R.id.edtConfirm);
+        Button btnCreate = view.findViewById(R.id.btnCreate);
+        TextView btnCancel = view.findViewById(R.id.btnCancel);
 
-        EditText edtPassword = new EditText(context);
-        edtPassword.setHint(context.getString(R.string.hint_password));
-        edtPassword.setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_VARIATION_PASSWORD);
-        layout.addView(edtPassword);
+        Dialog dialog = new Dialog(context);
+        dialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
+        dialog.setContentView(view);
+        dialog.setCancelable(false);
 
-        EditText edtConfirm = new EditText(context);
-        edtConfirm.setHint(context.getString(R.string.hint_confirm_password));
-        edtConfirm.setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_VARIATION_PASSWORD);
-        layout.addView(edtConfirm);
+        Window window = dialog.getWindow();
+        if (window != null) {
+            window.setBackgroundDrawableResource(android.R.color.transparent);
+            WindowManager.LayoutParams params = window.getAttributes();
+            params.width = WindowManager.LayoutParams.MATCH_PARENT;
+            params.height = WindowManager.LayoutParams.WRAP_CONTENT;
+            window.setAttributes(params);
+        }
 
-        new AlertDialog.Builder(context)
-                .setTitle(context.getString(R.string.dialog_set_password_title))
-                .setView(layout)
-                .setCancelable(false)
-                .setPositiveButton(context.getString(R.string.button_create), (d, w) -> {
-                    String pwd = edtPassword.getText().toString();
-                    String confirmPwd = edtConfirm.getText().toString();
-                    if (pwd.isEmpty()) {
-                        toast(context.getString(R.string.toast_password_empty));
-                        return;
-                    }
-                    if (!pwd.equals(confirmPwd)) {
-                        toast(context.getString(R.string.toast_passwords_do_not_match));
-                        return;
-                    }
-                    TxBuilder.KeyPair kp = TxBuilder.generateKeyPair();
-                    store.savePrivateKey(kp.privateKey, pwd);
-                    store.saveSyncState(-1, 0, 0);
-                    callback.onWalletCreated();
-                })
-                .setNegativeButton(context.getString(R.string.button_cancel), null)
-                .show();
+        btnCreate.setOnClickListener(v -> {
+            String pwd = edtPassword.getText().toString();
+            String confirmPwd = edtConfirm.getText().toString();
+
+            if (pwd.isEmpty()) {
+                toast(context.getString(R.string.toast_password_empty));
+                return;
+            }
+            if (!pwd.equals(confirmPwd)) {
+                toast(context.getString(R.string.toast_passwords_do_not_match));
+                return;
+            }
+
+            TxBuilder.KeyPair kp = TxBuilder.generateKeyPair();
+
+            store.clearHistory();
+
+            store.savePrivateKey(kp.privateKey, pwd);
+            store.saveSyncState(-1, 0, 0);
+            callback.onWalletCreated();
+            dialog.dismiss();
+        });
+
+        btnCancel.setOnClickListener(v -> dialog.dismiss());
+
+        dialog.show();
     }
 
     public void showImportDialog() {
-        LinearLayout layout = new LinearLayout(context);
-        layout.setOrientation(LinearLayout.VERTICAL);
-        layout.setPadding(48, 16, 48, 16);
+        @SuppressLint("InflateParams") View view = LayoutInflater.from(context).inflate(R.layout.dialog_import, null);
+        EditText edtInput = view.findViewById(R.id.edtInput);
+        EditText edtPassword = view.findViewById(R.id.edtPassword);
+        EditText edtConfirm = view.findViewById(R.id.edtConfirm);
+        Button btnImport = view.findViewById(R.id.btnImport);
+        TextView btnCancel = view.findViewById(R.id.btnCancel);
 
-        EditText edtInput = new EditText(context);
-        edtInput.setHint(context.getString(R.string.hint_import_input));
-        edtInput.setInputType(InputType.TYPE_CLASS_TEXT);
-        layout.addView(edtInput);
+        Dialog dialog = new Dialog(context);
+        dialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
+        dialog.setContentView(view);
+        dialog.setCancelable(false);
 
-        EditText edtPassword = new EditText(context);
-        edtPassword.setHint(context.getString(R.string.hint_set_wallet_password));
-        edtPassword.setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_VARIATION_PASSWORD);
-        layout.addView(edtPassword);
+        Window window = dialog.getWindow();
+        if (window != null) {
+            window.setBackgroundDrawableResource(android.R.color.transparent);
+            WindowManager.LayoutParams params = window.getAttributes();
+            params.width = WindowManager.LayoutParams.MATCH_PARENT;
+            params.height = WindowManager.LayoutParams.WRAP_CONTENT;
+            window.setAttributes(params);
+        }
 
-        EditText edtConfirm = new EditText(context);
-        edtConfirm.setHint(context.getString(R.string.hint_confirm_password));
-        edtConfirm.setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_VARIATION_PASSWORD);
-        layout.addView(edtConfirm);
+        btnImport.setOnClickListener(v -> {
+            String inputText = edtInput.getText().toString().trim();
+            String pwd = edtPassword.getText().toString();
+            String confirmPwd = edtConfirm.getText().toString();
 
-        new AlertDialog.Builder(context)
-                .setTitle(context.getString(R.string.dialog_import_title))
-                .setView(layout)
-                .setCancelable(false)
-                .setPositiveButton(context.getString(R.string.button_import), (d, w) -> {
-                    String inputText = edtInput.getText().toString().trim();
-                    String pwd = edtPassword.getText().toString();
-                    String confirmPwd = edtConfirm.getText().toString();
+            if (pwd.isEmpty()) {
+                toast(context.getString(R.string.toast_set_password_required));
+                return;
+            }
+            if (!pwd.equals(confirmPwd)) {
+                toast(context.getString(R.string.toast_passwords_do_not_match));
+                return;
+            }
 
-                    if (pwd.isEmpty()) {
-                        toast(context.getString(R.string.toast_set_password_required));
-                        return;
-                    }
-                    if (!pwd.equals(confirmPwd)) {
-                        toast(context.getString(R.string.toast_passwords_do_not_match));
-                        return;
-                    }
+            byte[] priv;
+            try {
+                if (Bip39Helper.isHexPrivateKey(inputText)) {
+                    priv = TxBuilder.fromHex(inputText);
+                } else {
+                    priv = Bip39Helper.mnemonicToEntropy(inputText);
+                }
+                if (priv.length != 32) {
+                    throw new IllegalArgumentException(context.getString(R.string.error_private_key_length));
+                }
+                store.clearHistory();
+                store.savePrivateKey(priv, pwd);
+                store.saveSyncState(-1, 0, 0);
+                callback.onWalletImported();
+                dialog.dismiss();
+            } catch (Exception e) {
+                toast(context.getString(R.string.toast_invalid_key, e.getMessage()));
+            }
+        });
 
-                    byte[] priv;
-                    try {
-                        if (Bip39Helper.isHexPrivateKey(inputText)) {
-                            priv = TxBuilder.fromHex(inputText);
-                            if (priv.length != 32) {
-                                throw new IllegalArgumentException(context.getString(R.string.error_private_key_length));
-                            }
-                        } else {
-                            priv = Bip39Helper.mnemonicToEntropy(inputText);
-                            if (priv.length != 32) {
-                                throw new IllegalArgumentException(context.getString(R.string.error_private_key_length));
-                            }
-                        }
-                        store.savePrivateKey(priv, pwd);
-                        store.saveSyncState(-1, 0, 0);
-                        callback.onWalletImported();
-                    } catch (Exception e) {
-                        toast(context.getString(R.string.toast_invalid_key, e.getMessage()));
-                    }
-                })
-                .setNegativeButton(context.getString(R.string.button_cancel), null)
-                .show();
+        btnCancel.setOnClickListener(v -> dialog.dismiss());
+
+        dialog.show();
     }
 
     public void showExportDialog() {
@@ -158,24 +211,38 @@ public class DialogManager {
             return;
         }
 
-        EditText input = new EditText(context);
-        input.setHint(context.getString(R.string.hint_wallet_password));
-        input.setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_VARIATION_PASSWORD);
+        @SuppressLint("InflateParams") View view = LayoutInflater.from(context).inflate(R.layout.dialog_export_password, null);
+        EditText edtPassword = view.findViewById(R.id.edtPassword);
+        Button btnConfirm = view.findViewById(R.id.btnConfirm);
+        TextView btnCancel = view.findViewById(R.id.btnCancel);
 
-        new AlertDialog.Builder(context)
-                .setTitle(context.getString(R.string.dialog_enter_password_title))
-                .setView(input)
-                .setCancelable(false)
-                .setPositiveButton(context.getString(R.string.button_ok), (d, w) -> {
-                    try {
-                        byte[] priv = store.loadPrivateKey(input.getText().toString());
-                        callback.onWalletExported(priv);
-                    } catch (Exception e) {
-                        toast(context.getString(R.string.toast_wrong_password));
-                    }
-                })
-                .setNegativeButton(context.getString(R.string.button_cancel), null)
-                .show();
+        Dialog dialog = new Dialog(context);
+        dialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
+        dialog.setContentView(view);
+        dialog.setCancelable(false);
+
+        Window window = dialog.getWindow();
+        if (window != null) {
+            window.setBackgroundDrawableResource(android.R.color.transparent);
+            WindowManager.LayoutParams params = window.getAttributes();
+            params.width = WindowManager.LayoutParams.MATCH_PARENT;
+            params.height = WindowManager.LayoutParams.WRAP_CONTENT;
+            window.setAttributes(params);
+        }
+
+        btnConfirm.setOnClickListener(v -> {
+            try {
+                byte[] priv = store.loadPrivateKey(edtPassword.getText().toString());
+                callback.onWalletExported(priv);
+                dialog.dismiss();
+            } catch (Exception e) {
+                toast(context.getString(R.string.toast_wrong_password));
+            }
+        });
+
+        btnCancel.setOnClickListener(v -> dialog.dismiss());
+
+        dialog.show();
     }
 
     public void showSendDialog() {

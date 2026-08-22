@@ -178,4 +178,8 @@ public final class WalletStore {
         new SecureRandom().nextBytes(b);
         return b;
     }
+
+    public void clearHistory() {
+        prefs.edit().remove(KEY_HISTORY).apply();
+    }
 }

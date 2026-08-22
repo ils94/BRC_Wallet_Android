@@ -1,9 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <!-- App -->
     <string name="app_name">BRC Wallet</string>
 
-    <!-- Main Activity -->
     <string name="label_receive_address">Receiving address</string>
     <string name="label_balance">Balance: %1$s</string>
     <string name="label_balance_empty">Balance: —</string>
@@ -17,7 +15,6 @@
     <string name="clipboard_label_address">BRC Address</string>
     <string name="qr_code_description">QR Code of address</string>
 
-    <!-- Menu -->
     <string name="menu_wallet">Wallet</string>
     <string name="menu_send">Send BRC</string>
     <string name="menu_history">Transaction history</string>
@@ -29,7 +26,6 @@
     <string name="menu_server">Server</string>
     <string name="menu_sync_height">Sync height</string>
 
-    <!-- Dialogs: New wallet -->
     <string name="dialog_new_wallet_title">Create new wallet?</string>
     <string name="dialog_new_wallet_message">This will erase the current wallet. Export the private key first if it has balance.</string>
     <string name="dialog_set_password_title">Set wallet password</string>
@@ -41,7 +37,6 @@
     <string name="toast_passwords_do_not_match">Passwords do not match.</string>
     <string name="toast_wallet_created">New wallet created!</string>
 
-    <!-- Dialogs: Import -->
     <string name="dialog_import_title">Import private key</string>
     <string name="hint_private_key">Private key (64 hex)</string>
     <string name="hint_set_wallet_password">Set wallet password</string>
@@ -51,20 +46,17 @@
     <string name="toast_wallet_imported">Wallet imported!</string>
     <string name="toast_invalid_key">Invalid key: %1$s</string>
 
-    <!-- Dialogs: Export -->
     <string name="dialog_enter_password_title">Enter password</string>
     <string name="button_ok">OK</string>
     <string name="toast_wrong_password">Incorrect password!</string>
     <string name="dialog_private_key_title">Private key — keep it safe!</string>
     <string name="toast_no_wallet">No wallet created.</string>
 
-    <!-- Dialogs: Change server -->
     <string name="dialog_change_server_title">Helper server URL</string>
     <string name="hint_server_url">http://example.com:9000</string>
     <string name="button_save">Save</string>
     <string name="toast_server_updated">Server updated!</string>
 
-    <!-- Dialogs: Send -->
     <string name="dialog_send_title">Send BRC</string>
     <string name="hint_recipient_address">Recipient address (64 hex)</string>
     <string name="hint_amount_brc">Amount (BRC)</string>
@@ -76,7 +68,6 @@
     <string name="error_address_length">address must be 64 hex chars</string>
     <string name="scan_prompt">Point the camera at the QR code</string>
 
-    <!-- Status messages -->
     <string name="status_syncing">Synchronizing…</string>
     <string name="status_sync_progress">Sync: block %1$d / %2$d</string>
     <string name="status_synced_to">Synced to block %1$d</string>
@@ -88,7 +79,6 @@
     <string name="status_tx_rejected">Rejected: %1$s</string>
     <string name="status_send_error">Error sending: %1$s</string>
 
-    <!-- Set height dialog -->
     <string name="dialog_set_height_title">Set sync height</string>
     <string name="dialog_set_height_message">Warning: setting a different height will reset balance and nonce, and synchronization will restart from that block. Use only if you are sure your wallet has no transactions before that height.</string>
     <string name="hint_block_height">Block height (e.g. 50000)</string>
@@ -96,7 +86,6 @@
     <string name="toast_height_set">Height set to %1$d. Synchronization will restart.</string>
     <string name="toast_invalid_height">Invalid height.</string>
 
-    <!-- History -->
     <string name="history_empty">No transactions recorded yet.</string>
     <string name="history_title">Transaction history</string>
     <string name="tx_type_send">➡️ Sent</string>
@@ -107,7 +96,6 @@
     <string name="tx_details_format">Block %1$d\nFrom: %2$s\nTo: %3$s\nValue: %4$s%5$s</string>
     <string name="tx_fee_suffix"> | Fee: %1$s</string>
 
-    <!-- Import / Export BIP39 -->
     <string name="hint_import_input">Private key (64 hex) or mnemonic seed phrase</string>
     <string name="toast_invalid_mnemonic">Invalid mnemonic phrase</string>
     <string name="dialog_export_format_title">Choose export format</string>
@@ -131,4 +119,6 @@
     <string name="toast_sync_stopped">Automatic synchronization stopped</string>
 
     <string name="menu_sync">Synchronization</string>
+
+    <string name="button_create_countdown">Wait %1$d s…</string>
 </resources>
