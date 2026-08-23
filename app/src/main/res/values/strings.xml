@@ -135,4 +135,8 @@
     <string name="filter_all">All</string>
     <string name="filter_sent">Sent</string>
     <string name="filter_received">Received</string>
+
+    <string name="dialog_import_warning_title">Import new wallet?</string>
+    <string name="dialog_import_warning_message">This will erase the current wallet. Export your private key first if it has balance.</string>
+    <string name="button_import_countdown">Wait %1$d s…</string>
 </resources>

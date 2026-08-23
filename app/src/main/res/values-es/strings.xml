@@ -135,4 +135,8 @@
     <string name="filter_all">Todos</string>
     <string name="filter_sent">Enviados</string>
     <string name="filter_received">Recibidos</string>
+
+    <string name="dialog_import_warning_title">¿Importar nueva cartera?</string>
+    <string name="dialog_import_warning_message">Esto borrará la cartera actual. Exporte su clave privada primero si tiene saldo.</string>
+    <string name="button_import_countdown">Espere %1$d s…</string>
 </resources>

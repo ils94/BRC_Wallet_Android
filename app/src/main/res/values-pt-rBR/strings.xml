@@ -135,4 +135,8 @@
     <string name="filter_all">Todos</string>
     <string name="filter_sent">Enviados</string>
     <string name="filter_received">Recebidos</string>
+
+    <string name="dialog_import_warning_title">Importar nova carteira?</string>
+    <string name="dialog_import_warning_message">Isso apagará a carteira atual. Exporte sua chave privada antes, se ela tiver saldo.</string>
+    <string name="button_import_countdown">Aguarde %1$d s…</string>
 </resources>

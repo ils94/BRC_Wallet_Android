@@ -41,6 +41,11 @@ public class DialogManager {
     }
 
     public void showNewWalletDialog() {
+        if (!store.hasWallet()) {
+            showCreateWalletPasswordDialog();
+            return;
+        }
+
         @SuppressLint("InflateParams") View view = LayoutInflater.from(context).inflate(R.layout.dialog_new_wallet, null);
         Button btnCreate = view.findViewById(R.id.btnCreate);
         TextView btnCancel = view.findViewById(R.id.btnCancel);
@@ -143,6 +148,65 @@ public class DialogManager {
     }
 
     public void showImportDialog() {
+
+        if (!store.hasWallet()) {
+            showImportInputDialog();
+            return;
+        }
+
+        @SuppressLint("InflateParams") View view = LayoutInflater.from(context).inflate(R.layout.dialog_import_warning, null);
+        Button btnImport = view.findViewById(R.id.btnImport);
+        TextView btnCancel = view.findViewById(R.id.btnCancel);
+
+        Dialog dialog = new Dialog(context);
+        dialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
+        dialog.setContentView(view);
+        dialog.setCancelable(false);
+
+        Window window = dialog.getWindow();
+        if (window != null) {
+            window.setBackgroundDrawableResource(android.R.color.transparent);
+            WindowManager.LayoutParams params = window.getAttributes();
+            params.width = WindowManager.LayoutParams.MATCH_PARENT;
+            params.height = WindowManager.LayoutParams.WRAP_CONTENT;
+            window.setAttributes(params);
+        }
+
+        Handler handler = new Handler(Looper.getMainLooper());
+        Runnable timerRunnable = new Runnable() {
+            int countdown = 10;
+
+            @Override
+            public void run() {
+                if (countdown > 0) {
+                    btnImport.setText(context.getString(R.string.button_import_countdown, countdown));
+                    countdown--;
+                    handler.postDelayed(this, 1000);
+                } else {
+                    btnImport.setText(R.string.button_import);
+                    btnImport.setEnabled(true);
+                }
+            }
+        };
+        handler.post(timerRunnable);
+
+        btnImport.setOnClickListener(v -> {
+            handler.removeCallbacks(timerRunnable);
+            dialog.dismiss();
+            showImportInputDialog();
+        });
+
+        btnCancel.setOnClickListener(v -> {
+            handler.removeCallbacks(timerRunnable);
+            dialog.dismiss();
+        });
+
+        dialog.setOnDismissListener(d -> handler.removeCallbacks(timerRunnable));
+
+        dialog.show();
+    }
+
+    private void showImportInputDialog() {
         @SuppressLint("InflateParams") View view = LayoutInflater.from(context).inflate(R.layout.dialog_import, null);
         EditText edtInput = view.findViewById(R.id.edtInput);
         EditText edtPassword = view.findViewById(R.id.edtPassword);
