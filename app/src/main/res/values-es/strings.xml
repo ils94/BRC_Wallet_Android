@@ -121,4 +121,9 @@
     <string name="menu_sync">Synchronization</string>
 
     <string name="button_create_countdown">Espere %1$d s…</string>
+
+    <string name="label_block">Bloque:</string>
+    <string name="label_txid">TxID:</string>
+    <string name="label_from">De:</string>
+    <string name="label_to">Para:</string>
 </resources>
