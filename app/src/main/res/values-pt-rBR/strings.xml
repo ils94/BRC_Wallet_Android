@@ -175,4 +175,8 @@
 
     <string name="hint_search_contact">Buscar contato…</string>
     <string name="clear_contact_filter">Limpar filtro de contato</string>
+
+    <string name="notification_incoming_title">BRC recebido</string>
+    <string name="notification_incoming_text">Você recebeu %1$s</string>
+    <string name="notification_tx_details">Bloco: %1$d\nDe: %2$s\nValor: %3$s</string>
 </resources>

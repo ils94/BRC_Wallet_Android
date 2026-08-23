@@ -5,6 +5,7 @@ import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.app.Service;
+import android.app.TaskStackBuilder;
 import android.content.Intent;
 import android.content.pm.ServiceInfo;
 import android.os.Handler;
@@ -28,6 +29,8 @@ public class BackgroundSyncService extends Service {
     private Handler handler;
     private WalletOperations operations;
     private WalletStore store;
+    private ContactsStore contactsStore;
+    private String myAddress;
     private boolean isSyncing = false;
 
     @Override
@@ -35,6 +38,10 @@ public class BackgroundSyncService extends Service {
         super.onCreate();
 
         store = new WalletStore(this);
+        contactsStore = new ContactsStore(this);
+        byte[] pub = store.loadPublicKey();
+        myAddress = pub != null ? TxBuilder.toHex(pub) : null;
+
         BRCApi api = new BRCApi(store.getApiBase());
         operations = new WalletOperations(this, store, api);
         handler = new Handler(Looper.getMainLooper());
@@ -91,20 +98,38 @@ public class BackgroundSyncService extends Service {
         }
     }
 
+    private String resolveAddressDisplay(String address) {
+        if (address == null || address.isEmpty()) {
+            return "unknown";
+        }
+        if (myAddress != null && myAddress.equalsIgnoreCase(address)) {
+            return getString(R.string.label_my_address);
+        }
+        for (Contact c : contactsStore.loadContacts()) {
+            if (c.address.equalsIgnoreCase(address)) {
+                return c.name;
+            }
+        }
+        return address;
+    }
+
     private void showIncomingTxNotification(TxRecord tx) {
         String amount = TxBuilder.weiToBrc(tx.amountWei);
-        String details = "Block: " + tx.blockHeight + "\n"
-                + "From: " + (tx.from.isEmpty() ? "unknown" : tx.from) + "\n"
-                + "Amount: " + amount;
+        String fromDisplay = resolveAddressDisplay(tx.from);
+
+        String details = getString(R.string.notification_tx_details,
+                tx.blockHeight,
+                fromDisplay,
+                amount);
 
         Notification notification = new NotificationCompat.Builder(this, CHANNEL_ID_TX)
                 .setSmallIcon(R.mipmap.ic_launcher_round_monochrome)
-                .setContentTitle("Incoming BRC")
-                .setContentText("You received " + amount)
+                .setContentTitle(getString(R.string.notification_incoming_title))
+                .setContentText(getString(R.string.notification_incoming_text, amount))
                 .setStyle(new NotificationCompat.BigTextStyle().bigText(details))
                 .setPriority(NotificationCompat.PRIORITY_HIGH)
                 .setAutoCancel(true)
-                .setContentIntent(getMainActivityPendingIntent())
+                .setContentIntent(getHistoryActivityPendingIntent())
                 .build();
 
         NotificationManager manager = getSystemService(NotificationManager.class);
@@ -116,6 +141,14 @@ public class BackgroundSyncService extends Service {
         Intent intent = new Intent(this, MainActivity.class);
         return PendingIntent.getActivity(
                 this, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE);
+    }
+
+    private PendingIntent getHistoryActivityPendingIntent() {
+        TaskStackBuilder stackBuilder = TaskStackBuilder.create(this);
+        stackBuilder.addNextIntent(new Intent(this, MainActivity.class));
+        stackBuilder.addNextIntent(new Intent(this, HistoryActivity.class));
+        return stackBuilder.getPendingIntent(
+                1, PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE);
     }
 
     private void createNotificationChannels() {
