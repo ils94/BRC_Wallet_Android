@@ -10,18 +10,18 @@
     <TextView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="@string/dialog_send_title"
+        android:text="@string/dialog_add_contact_title"
         android:textColor="#F5F5F5"
         android:textSize="20sp"
         android:textStyle="bold" />
 
     <EditText
-        android:id="@+id/edtTo"
+        android:id="@+id/edtName"
         android:layout_width="match_parent"
         android:layout_height="52dp"
         android:layout_marginTop="20dp"
         android:background="@drawable/bg_input"
-        android:hint="@string/hint_recipient_address"
+        android:hint="@string/hint_contact_name"
         android:inputType="text"
         android:paddingStart="14dp"
         android:paddingEnd="14dp"
@@ -31,43 +31,13 @@
         tools:ignore="Autofill" />
 
     <EditText
-        android:id="@+id/edtAmount"
+        android:id="@+id/edtAddress"
         android:layout_width="match_parent"
         android:layout_height="52dp"
         android:layout_marginTop="12dp"
         android:background="@drawable/bg_input"
-        android:hint="@string/hint_amount_brc"
-        android:inputType="numberDecimal"
-        android:paddingStart="14dp"
-        android:paddingEnd="14dp"
-        android:textColor="#F5F5F5"
-        android:textColorHint="#777D86"
-        android:textSize="14sp"
-        tools:ignore="Autofill" />
-
-    <EditText
-        android:id="@+id/edtFee"
-        android:layout_width="match_parent"
-        android:layout_height="52dp"
-        android:layout_marginTop="12dp"
-        android:background="@drawable/bg_input"
-        android:hint="@string/hint_fee_brc"
-        android:inputType="numberDecimal"
-        android:paddingStart="14dp"
-        android:paddingEnd="14dp"
-        android:textColor="#F5F5F5"
-        android:textColorHint="#777D86"
-        android:textSize="14sp"
-        tools:ignore="Autofill" />
-
-    <EditText
-        android:id="@+id/edtPassword"
-        android:layout_width="match_parent"
-        android:layout_height="52dp"
-        android:layout_marginTop="12dp"
-        android:background="@drawable/bg_input"
-        android:hint="@string/hint_wallet_password"
-        android:inputType="textPassword"
+        android:hint="@string/hint_contact_address"
+        android:inputType="text"
         android:paddingStart="14dp"
         android:paddingEnd="14dp"
         android:textColor="#F5F5F5"
@@ -95,19 +65,18 @@
             android:textStyle="bold" />
 
         <androidx.appcompat.widget.AppCompatButton
-            android:id="@+id/btnSend"
+            android:id="@+id/btnSave"
             android:layout_width="0dp"
             android:layout_height="50dp"
             android:layout_marginStart="10dp"
             android:layout_weight="1"
             android:background="@drawable/button_primary"
             android:stateListAnimator="@null"
-            android:text="@string/button_send"
+            android:text="@string/button_save"
             android:textAllCaps="false"
             android:textColor="#FFFFFF"
             android:textSize="14sp"
             android:textStyle="bold" />
-
     </LinearLayout>
 
     <TextView
@@ -122,5 +91,4 @@
         android:text="@string/button_cancel"
         android:textColor="#777D86"
         android:textSize="14sp" />
-
 </LinearLayout>

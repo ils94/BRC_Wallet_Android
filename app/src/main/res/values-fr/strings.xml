@@ -141,4 +141,33 @@
     <string name="button_import_countdown">Attendez %1$d s…</string>
 
     <string name="current_block_subtitle">Bloc actuel : %1$d</string>
+
+    <string name="menu_contacts">Contacts</string>
+    <string name="menu_add_contact">Ajouter un contact</string>
+    <string name="contacts_empty">Aucun contact pour l’instant</string>
+    <string name="dialog_add_contact_title">Nouveau contact</string>
+    <string name="dialog_edit_contact_title">Modifier le contact</string>
+    <string name="hint_contact_name">Nom du contact</string>
+    <string name="hint_contact_address">Adresse de réception</string>
+    <string name="button_edit">Modifier</string>
+    <string name="button_delete">Supprimer</string>
+    <string name="toast_contact_empty_fields">Remplissez tous les champs</string>
+    <string name="toast_contact_invalid_address">Adresse invalide</string>
+    <string name="dialog_delete_contact_title">Supprimer le contact</string>
+    <string name="dialog_delete_contact_message">Supprimer %1$s ?</string>
+
+    <string name="toast_contact_duplicate">Le contact existe déjà</string>
+    <string name="dialog_export_contacts_title">JSON des contacts</string>
+    <string name="toast_export_failed">Échec de l\'exportation</string>
+    <string name="chooser_share_contacts">Partager les contacts</string>
+    <string name="toast_import_result">Importés : %1$d, doublons : %2$d</string>
+    <string name="toast_import_invalid_json">JSON invalide</string>
+    <string name="button_select_file">Sélectionner un fichier</string>
+    <string name="dialog_import_contacts_message">Sélectionnez un fichier JSON contenant des contacts.</string>
+    <string name="toast_import_failed">Échec de l\'importation</string>
+
+    <string name="menu_export_contacts">Exporter les contacts</string>
+    <string name="menu_import_contacts">Importer les contacts</string>
+    <string name="dialog_import_contacts_title">Importer les contacts</string>
+    <string name="toast_export_success">Contacts exportés avec succès</string>
 </resources>

@@ -17,6 +17,11 @@
                 android:id="@+id/action_history"
                 android:title="@string/menu_history"
                 app:showAsAction="never" />
+
+            <item
+                android:id="@+id/action_contacts"
+                android:title="@string/menu_contacts"
+                app:showAsAction="never" />
         </menu>
     </item>
 

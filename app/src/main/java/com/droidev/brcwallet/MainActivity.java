@@ -130,6 +130,9 @@ public class MainActivity extends AppCompatActivity implements DialogManager.Wal
         } else if (id == R.id.action_stop_sync) {
             stopBackgroundSync();
             return true;
+        } else if (id == R.id.action_contacts) {
+            startActivity(new Intent(this, ContactsActivity.class));
+            return true;
         }
         return super.onOptionsItemSelected(item);
     }

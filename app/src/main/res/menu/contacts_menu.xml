@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <item
+        android:id="@+id/action_add_contact"
+        android:title="@string/menu_add_contact"
+        app:showAsAction="never" />
+
+    <item
+        android:id="@+id/action_export_contacts"
+        android:title="@string/menu_export_contacts"
+        app:showAsAction="never" />
+
+    <item
+        android:id="@+id/action_import_contacts"
+        android:title="@string/menu_import_contacts"
+        app:showAsAction="never" />
+</menu>

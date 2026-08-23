@@ -141,4 +141,33 @@
     <string name="button_import_countdown">Warten %1$d s…</string>
 
     <string name="current_block_subtitle">Aktueller Block: %1$d</string>
+
+    <string name="menu_contacts">Kontakte</string>
+    <string name="menu_add_contact">Kontakt hinzufügen</string>
+    <string name="contacts_empty">Noch keine Kontakte</string>
+    <string name="dialog_add_contact_title">Neuer Kontakt</string>
+    <string name="dialog_edit_contact_title">Kontakt bearbeiten</string>
+    <string name="hint_contact_name">Kontaktname</string>
+    <string name="hint_contact_address">Empfangsadresse</string>
+    <string name="button_edit">Bearbeiten</string>
+    <string name="button_delete">Löschen</string>
+    <string name="toast_contact_empty_fields">Alle Felder ausfüllen</string>
+    <string name="toast_contact_invalid_address">Ungültige Adresse</string>
+    <string name="dialog_delete_contact_title">Kontakt löschen</string>
+    <string name="dialog_delete_contact_message">%1$s löschen?</string>
+
+    <string name="toast_contact_duplicate">Kontakt existiert bereits</string>
+    <string name="dialog_export_contacts_title">Kontakte-JSON</string>
+    <string name="toast_export_failed">Export fehlgeschlagen</string>
+    <string name="chooser_share_contacts">Kontakte teilen</string>
+    <string name="toast_import_result">Importiert: %1$d, Duplikate: %2$d</string>
+    <string name="toast_import_invalid_json">Ungültiges JSON</string>
+    <string name="button_select_file">Datei auswählen</string>
+    <string name="dialog_import_contacts_message">Wählen Sie eine JSON-Datei mit Kontakten aus.</string>
+    <string name="toast_import_failed">Import fehlgeschlagen</string>
+
+    <string name="menu_export_contacts">Kontakte exportieren</string>
+    <string name="menu_import_contacts">Kontakte importieren</string>
+    <string name="dialog_import_contacts_title">Kontakte importieren</string>
+    <string name="toast_export_success">Kontakte erfolgreich exportiert</string>
 </resources>
