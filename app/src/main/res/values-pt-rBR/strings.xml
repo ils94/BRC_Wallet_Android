@@ -93,7 +93,7 @@
     <string name="tx_type_mine">⛏️ Mineração</string>
     <string name="tx_type_lock">🔒 Lock</string>
     <string name="tx_type_redeem">🔓 Redeem</string>
-    <string name="tx_details_format">Bloco %1$d\nDe: %2$s\nPara: %3$s\nValor: %4$s%5$s</string>
+    <string name="tx_details_format">Bloco %1$d\nTxID: %2$s\nDe: %3$s\nPara: %4$s\nValor: %5$s%6$s</string>
     <string name="tx_fee_suffix"> | Taxa: %1$s</string>
 
     <string name="hint_import_input">Chave privada (64 hex) ou frase mnemônica</string>

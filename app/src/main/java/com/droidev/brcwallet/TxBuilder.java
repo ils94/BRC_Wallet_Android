@@ -6,8 +6,9 @@ import org.bouncycastle.crypto.signers.Ed25519Signer;
 
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
-
 
 public final class TxBuilder {
 
@@ -36,7 +37,8 @@ public final class TxBuilder {
         if (to == null || to.length != 32)
             throw new IllegalArgumentException("'to' must be 32 bytes");
         if (amountWei < 0 || feeWei < 0) throw new IllegalArgumentException("negative amount/fee");
-        if (amountWei == 0 && feeWei == 0) throw new IllegalArgumentException("transaction has no value");
+        if (amountWei == 0 && feeWei == 0)
+            throw new IllegalArgumentException("transaction has no value");
         if (amountWei + feeWei > MAX_MONEY) throw new IllegalArgumentException("exceeds MAX_MONEY");
         if (feeWei < MIN_FEE)
             throw new IllegalArgumentException("fee below minimum (" + MIN_FEE + " wei)");
@@ -63,6 +65,16 @@ public final class TxBuilder {
         System.arraycopy(preimage, 0, tx, 0, PREIMAGE_SIZE);
         System.arraycopy(signature, 0, tx, PREIMAGE_SIZE, 64);
         return tx;
+    }
+
+    public static String sha256Hex(byte[] data) {
+        try {
+            MessageDigest md = MessageDigest.getInstance("SHA-256");
+            byte[] hash = md.digest(data);
+            return toHex(hash);
+        } catch (NoSuchAlgorithmException e) {
+            throw new RuntimeException("SHA-256 not available", e);
+        }
     }
 
     public static String toHex(byte[] b) {

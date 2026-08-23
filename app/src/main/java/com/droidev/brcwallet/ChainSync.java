@@ -6,7 +6,6 @@ import java.nio.ByteOrder;
 import java.util.Arrays;
 import java.util.List;
 
-
 public final class ChainSync {
 
     private static final int TAG_LOCK = 0x4c4f434b;
@@ -19,7 +18,9 @@ public final class ChainSync {
     private static final long BASE_RETRY_DELAY_MS = 2_000;
     private static final long REQUEST_INTERVAL_MS = 250;
 
-    public interface Progress { void onProgress(long height, long tip); }
+    public interface Progress {
+        void onProgress(long height, long tip);
+    }
 
     public static final class AccountState {
         public long height = -1;
@@ -49,7 +50,6 @@ public final class ChainSync {
 
             sleep(REQUEST_INTERVAL_MS);
         }
-
     }
 
     private static List<byte[]> fetchBlocksWithRetry(BRCApi api, long from)
@@ -104,6 +104,9 @@ public final class ChainSync {
                 long nonce = u32(block, off + 84);
                 blockFees += fee;
 
+                byte[] txBytes = Arrays.copyOfRange(block, off, off + 152);
+                String txid = TxBuilder.sha256Hex(txBytes);
+
                 boolean isFromUs = Arrays.equals(from, ourAddr);
                 boolean isToUs = Arrays.equals(to, ourAddr);
 
@@ -111,14 +114,14 @@ public final class ChainSync {
                     s.balanceWei -= (amount + fee);
                     s.nonce = nonce + 1;
                     if (history != null) {
-                        history.add(new TxRecord(TxRecord.Type.SEND, height,
+                        history.add(new TxRecord(TxRecord.Type.SEND, height, txid,
                                 TxBuilder.toHex(from), TxBuilder.toHex(to), amount, fee, nonce));
                     }
                 }
                 if (isToUs && !isFromUs) {
                     s.balanceWei += amount;
                     if (history != null) {
-                        history.add(new TxRecord(TxRecord.Type.RECEIVE, height,
+                        history.add(new TxRecord(TxRecord.Type.RECEIVE, height, txid,
                                 TxBuilder.toHex(from), TxBuilder.toHex(to), amount, fee, nonce));
                     }
                 }
@@ -130,11 +133,14 @@ public final class ChainSync {
                 long nonce = u32(block, off + 56);
                 blockFees += fee;
 
+                byte[] txBytes = Arrays.copyOfRange(block, off, off + 156);
+                String txid = TxBuilder.sha256Hex(txBytes);
+
                 if (Arrays.equals(from, ourAddr)) {
                     s.balanceWei -= (amount + fee);
                     s.nonce = nonce + 1;
                     if (history != null) {
-                        history.add(new TxRecord(TxRecord.Type.LOCK, height,
+                        history.add(new TxRecord(TxRecord.Type.LOCK, height, txid,
                                 TxBuilder.toHex(from), "", amount, fee, nonce));
                     }
                 }
@@ -145,13 +151,6 @@ public final class ChainSync {
                 long fee = i64(block, off + 76);
                 blockFees += fee;
 
-                if (Arrays.equals(to, ourAddr)) {
-                    s.balanceWei += (amount - fee);
-                    if (history != null) {
-                        history.add(new TxRecord(TxRecord.Type.REDEEM, height,
-                                "", TxBuilder.toHex(to), amount, fee, 0));
-                    }
-                }
                 int scriptLen = u16(block, off + 84);
                 int p = off + 86 + scriptLen;
                 int witnessCount = block[p] & 0xFF;
@@ -159,6 +158,17 @@ public final class ChainSync {
                 for (int w = 0; w < witnessCount; w++) {
                     int len = u16(block, p);
                     p += 2 + len;
+                }
+
+                byte[] txBytes = Arrays.copyOfRange(block, off, p);
+                String txid = TxBuilder.sha256Hex(txBytes);
+
+                if (Arrays.equals(to, ourAddr)) {
+                    s.balanceWei += (amount - fee);
+                    if (history != null) {
+                        history.add(new TxRecord(TxRecord.Type.REDEEM, height, txid,
+                                "", TxBuilder.toHex(to), amount, fee, 0));
+                    }
                 }
                 off = p;
             } else {
@@ -173,7 +183,7 @@ public final class ChainSync {
             if (Arrays.equals(miner, ourAddr)) {
                 s.balanceWei += subsidy + blockFees;
                 if (history != null) {
-                    history.add(new TxRecord(TxRecord.Type.MINE, height,
+                    history.add(new TxRecord(TxRecord.Type.MINE, height, "",
                             "", TxBuilder.toHex(miner), subsidy + blockFees, 0, 0));
                 }
             }

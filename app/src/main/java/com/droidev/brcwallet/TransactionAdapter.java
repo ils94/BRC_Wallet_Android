@@ -64,8 +64,10 @@ public class TransactionAdapter extends RecyclerView.Adapter<TransactionAdapter.
                 : "";
         String from = tx.from.isEmpty() ? "?" : tx.from;
         String to = tx.to.isEmpty() ? "?" : tx.to;
+        String txid = (tx.txid == null || tx.txid.isEmpty()) ? "?" : tx.txid;
+
         return context.getString(R.string.tx_details_format,
-                tx.blockHeight, from, to, amount, feeSuffix);
+                tx.blockHeight, txid, from, to, amount, feeSuffix);
     }
 
     static class ViewHolder extends RecyclerView.ViewHolder {
