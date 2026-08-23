@@ -172,4 +172,7 @@
     <string name="toast_export_success">Kontakte erfolgreich exportiert</string>
 
     <string name="label_my_address">Meine Adresse</string>
+
+    <string name="hint_search_contact">Kontakt suchen…</string>
+    <string name="clear_contact_filter">Kontaktfilter löschen</string>
 </resources>

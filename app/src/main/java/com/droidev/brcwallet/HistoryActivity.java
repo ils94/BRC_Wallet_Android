@@ -3,9 +3,13 @@ package com.droidev.brcwallet;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
+import android.widget.AutoCompleteTextView;
+import android.widget.ImageButton;
 import android.widget.Spinner;
 import android.widget.TextView;
 
@@ -25,6 +29,12 @@ public class HistoryActivity extends AppCompatActivity {
     private List<TxRecord> allTransactions;
     private TransactionAdapter adapter;
     private WalletStore store;
+    private ContactsStore contactsStore;
+
+    private AutoCompleteTextView autoCompleteContact;
+    private ImageButton btnClearContactFilter;
+
+    private String contactFilterAddress = null;
 
     private Handler uiHandler;
     private Runnable updater;
@@ -45,18 +55,72 @@ public class HistoryActivity extends AppCompatActivity {
         TextView txtEmpty = findViewById(R.id.txtEmpty);
         Spinner spinnerSort = findViewById(R.id.spinnerSort);
         Spinner spinnerFilter = findViewById(R.id.spinnerFilter);
+        autoCompleteContact = findViewById(R.id.autoCompleteContact);
+        btnClearContactFilter = findViewById(R.id.btnClearContactFilter);
 
         store = new WalletStore(this);
         allTransactions = store.loadHistory();
+        contactsStore = new ContactsStore(this);
 
         byte[] pub = store.loadPublicKey();
         String myAddress = pub != null ? TxBuilder.toHex(pub) : "";
 
-        ContactsStore contactsStore = new ContactsStore(this);
         adapter = new TransactionAdapter(new ArrayList<>(), contactsStore, myAddress);
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
         recyclerView.setAdapter(adapter);
 
+        List<Contact> contactList = contactsStore.loadContacts();
+        ArrayAdapter<Contact> contactAdapter = new ArrayAdapter<>(this,
+                android.R.layout.simple_dropdown_item_1line, contactList);
+        autoCompleteContact.setAdapter(contactAdapter);
+        autoCompleteContact.setThreshold(1);
+
+        autoCompleteContact.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+            }
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+                String typed = s.toString().trim();
+                if (typed.isEmpty()) {
+                    contactFilterAddress = null;
+                    btnClearContactFilter.setVisibility(View.GONE);
+                } else {
+                    Contact matched = findContactByNameOrAddress(typed);
+                    if (matched != null) {
+                        contactFilterAddress = matched.address;
+                        btnClearContactFilter.setVisibility(View.VISIBLE);
+                    } else {
+                        contactFilterAddress = null;
+                        btnClearContactFilter.setVisibility(View.GONE);
+                    }
+                }
+                applyFiltersAndSort();
+            }
+
+            @Override
+            public void afterTextChanged(Editable s) {
+            }
+        });
+
+        autoCompleteContact.setOnItemClickListener((parent, view, position, id) -> {
+            Contact selected = contactAdapter.getItem(position);
+            if (selected != null) {
+                contactFilterAddress = selected.address;
+                btnClearContactFilter.setVisibility(View.VISIBLE);
+                applyFiltersAndSort();
+            }
+        });
+
+        btnClearContactFilter.setOnClickListener(v -> {
+            autoCompleteContact.setText("");
+            contactFilterAddress = null;
+            btnClearContactFilter.setVisibility(View.GONE);
+            applyFiltersAndSort();
+        });
+
+        // Spinners
         ArrayAdapter<CharSequence> sortAdapter = ArrayAdapter.createFromResource(
                 this,
                 R.array.sort_options,
@@ -102,14 +166,22 @@ public class HistoryActivity extends AppCompatActivity {
             @Override
             public void run() {
                 updateBlockSubtitle();
-
                 allTransactions = store.loadHistory();
                 applyFiltersAndSort();
-
                 uiHandler.postDelayed(this, 1000);
             }
         };
         uiHandler.post(updater);
+    }
+
+    private Contact findContactByNameOrAddress(String query) {
+        String lowerQuery = query.toLowerCase();
+        for (Contact c : contactsStore.loadContacts()) {
+            if (c.name.toLowerCase().contains(lowerQuery) || c.address.toLowerCase().contains(lowerQuery)) {
+                return c;
+            }
+        }
+        return null;
     }
 
     private void updateBlockSubtitle() {
@@ -155,6 +227,12 @@ public class HistoryActivity extends AppCompatActivity {
                     include = (tx.type == TxRecord.Type.RECEIVE);
                     break;
             }
+
+            if (include && contactFilterAddress != null) {
+                include = (tx.from.equalsIgnoreCase(contactFilterAddress)
+                        || tx.to.equalsIgnoreCase(contactFilterAddress));
+            }
+
             if (include) filtered.add(tx);
         }
 

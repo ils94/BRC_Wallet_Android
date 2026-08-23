@@ -1,5 +1,7 @@
 package com.droidev.brcwallet;
 
+import androidx.annotation.NonNull;
+
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -21,5 +23,11 @@ public class Contact {
 
     public static Contact fromJson(JSONObject j) throws JSONException {
         return new Contact(j.getString("name"), j.getString("address"));
+    }
+
+    @NonNull
+    @Override
+    public String toString() {
+        return name;
     }
 }
