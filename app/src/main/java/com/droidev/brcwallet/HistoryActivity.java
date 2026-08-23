@@ -49,7 +49,11 @@ public class HistoryActivity extends AppCompatActivity {
         store = new WalletStore(this);
         allTransactions = store.loadHistory();
 
-        adapter = new TransactionAdapter(new ArrayList<>());
+        byte[] pub = store.loadPublicKey();
+        String myAddress = pub != null ? TxBuilder.toHex(pub) : "";
+
+        ContactsStore contactsStore = new ContactsStore(this);
+        adapter = new TransactionAdapter(new ArrayList<>(), contactsStore, myAddress);
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
         recyclerView.setAdapter(adapter);
 

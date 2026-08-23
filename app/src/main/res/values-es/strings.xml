@@ -170,4 +170,6 @@
     <string name="menu_import_contacts">Importar contactos</string>
     <string name="dialog_import_contacts_title">Importar contactos</string>
     <string name="toast_export_success">Contactos exportados con éxito</string>
+
+    <string name="label_my_address">Mi dirección</string>
 </resources>

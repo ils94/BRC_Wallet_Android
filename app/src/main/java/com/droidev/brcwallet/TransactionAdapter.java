@@ -22,9 +22,13 @@ public class TransactionAdapter extends RecyclerView.Adapter<TransactionAdapter.
     private static final String ADDRESS_URL = "https://tabscope.netlify.app/#/account/%1$s";
 
     private List<TxRecord> transactions;
+    private final ContactsStore contactsStore;
+    private final String myAddress;
 
-    public TransactionAdapter(List<TxRecord> transactions) {
+    public TransactionAdapter(List<TxRecord> transactions, ContactsStore contactsStore, String myAddress) {
         this.transactions = transactions;
+        this.contactsStore = contactsStore;
+        this.myAddress = myAddress;
     }
 
     @NonNull
@@ -56,18 +60,22 @@ public class TransactionAdapter extends RecyclerView.Adapter<TransactionAdapter.
             holder.txtTxidValue.setOnClickListener(null);
         }
 
-        String from = tx.from.isEmpty() ? "?" : tx.from;
-        holder.txtFromValue.setText(from);
-        if (!from.equals("?")) {
-            holder.txtFromValue.setOnClickListener(v -> openUrl(context, String.format(ADDRESS_URL, from)));
+        String fromAddress = tx.from.isEmpty() ? "?" : tx.from;
+        String fromDisplay = resolveDisplayAddress(context, fromAddress);
+        holder.txtFromValue.setText(fromDisplay);
+        if (!fromAddress.equals("?")) {
+            String finalFromAddress = fromAddress;
+            holder.txtFromValue.setOnClickListener(v -> openUrl(context, String.format(ADDRESS_URL, finalFromAddress)));
         } else {
             holder.txtFromValue.setOnClickListener(null);
         }
 
-        String to = tx.to.isEmpty() ? "?" : tx.to;
-        holder.txtToValue.setText(to);
-        if (!to.equals("?")) {
-            holder.txtToValue.setOnClickListener(v -> openUrl(context, String.format(ADDRESS_URL, to)));
+        String toAddress = tx.to.isEmpty() ? "?" : tx.to;
+        String toDisplay = resolveDisplayAddress(context, toAddress);
+        holder.txtToValue.setText(toDisplay);
+        if (!toAddress.equals("?")) {
+            String finalToAddress = toAddress;
+            holder.txtToValue.setOnClickListener(v -> openUrl(context, String.format(ADDRESS_URL, finalToAddress)));
         } else {
             holder.txtToValue.setOnClickListener(null);
         }
@@ -82,6 +90,24 @@ public class TransactionAdapter extends RecyclerView.Adapter<TransactionAdapter.
     public void updateList(List<TxRecord> newList) {
         this.transactions = newList;
         notifyDataSetChanged();
+    }
+
+    private String resolveDisplayAddress(Context context, String address) {
+        if (address == null || address.equals("?")) {
+            return "?";
+        }
+
+        if (myAddress != null && !myAddress.isEmpty() && myAddress.equalsIgnoreCase(address)) {
+            return context.getString(R.string.label_my_address);
+        }
+
+        for (Contact contact : contactsStore.loadContacts()) {
+            if (contact.address.equalsIgnoreCase(address)) {
+                return contact.name;
+            }
+        }
+
+        return address;
     }
 
     private String getTypeLabel(Context context, TxRecord.Type type) {
