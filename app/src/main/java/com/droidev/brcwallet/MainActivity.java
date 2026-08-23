@@ -44,7 +44,7 @@ public class MainActivity extends AppCompatActivity implements DialogManager.Wal
     private Button btnCopy, btnShare;
 
     private EditText tempEdtTo;
-    
+
     private final ActivityResultLauncher<String> notificationPermissionLauncher =
             registerForActivityResult(new ActivityResultContracts.RequestPermission(), granted -> {
                 if (granted) {
@@ -269,9 +269,17 @@ public class MainActivity extends AppCompatActivity implements DialogManager.Wal
 
     private void shareAddress() {
         if (!store.hasWallet()) return;
+
+        String address = txtAddress.getText().toString();
+
+        if (address.isEmpty() || address.equals(getString(R.string.label_no_wallet))) {
+            toast(getString(R.string.toast_no_wallet));
+            return;
+        }
+
         Intent sendIntent = new Intent();
         sendIntent.setAction(Intent.ACTION_SEND);
-        sendIntent.putExtra(Intent.EXTRA_TEXT, txtAddress.getText());
+        sendIntent.putExtra(Intent.EXTRA_TEXT, address);
         sendIntent.setType("text/plain");
         startActivity(Intent.createChooser(sendIntent,
                 getString(R.string.chooser_share_address)));
