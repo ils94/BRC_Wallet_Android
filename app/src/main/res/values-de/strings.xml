@@ -139,4 +139,6 @@
     <string name="dialog_import_warning_title">Neue Wallet importieren?</string>
     <string name="dialog_import_warning_message">Dadurch wird die aktuelle Wallet gelöscht. Exportieren Sie zuerst Ihren privaten Schlüssel, falls Guthaben vorhanden ist.</string>
     <string name="button_import_countdown">Warten %1$d s…</string>
+
+    <string name="current_block_subtitle">Aktueller Block: %1$d</string>
 </resources>

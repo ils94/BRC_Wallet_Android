@@ -139,4 +139,6 @@
     <string name="dialog_import_warning_title">Importar nova carteira?</string>
     <string name="dialog_import_warning_message">Isso apagará a carteira atual. Exporte sua chave privada antes, se ela tiver saldo.</string>
     <string name="button_import_countdown">Aguarde %1$d s…</string>
+
+    <string name="current_block_subtitle">Bloco atual: %1$d</string>
 </resources>

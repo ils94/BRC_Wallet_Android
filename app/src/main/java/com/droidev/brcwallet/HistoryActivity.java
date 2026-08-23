@@ -1,6 +1,8 @@
 package com.droidev.brcwallet;
 
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Looper;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
@@ -22,6 +24,10 @@ public class HistoryActivity extends AppCompatActivity {
 
     private List<TxRecord> allTransactions;
     private TransactionAdapter adapter;
+    private WalletStore store;
+
+    private Handler uiHandler;
+    private Runnable updater;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -40,7 +46,7 @@ public class HistoryActivity extends AppCompatActivity {
         Spinner spinnerSort = findViewById(R.id.spinnerSort);
         Spinner spinnerFilter = findViewById(R.id.spinnerFilter);
 
-        WalletStore store = new WalletStore(this);
+        store = new WalletStore(this);
         allTransactions = store.loadHistory();
 
         adapter = new TransactionAdapter(new ArrayList<>());
@@ -86,6 +92,41 @@ public class HistoryActivity extends AppCompatActivity {
         });
 
         applyFiltersAndSort();
+
+        uiHandler = new Handler(Looper.getMainLooper());
+        updater = new Runnable() {
+            @Override
+            public void run() {
+                updateBlockSubtitle();
+
+                allTransactions = store.loadHistory();
+                applyFiltersAndSort();
+
+                uiHandler.postDelayed(this, 1000);
+            }
+        };
+        uiHandler.post(updater);
+    }
+
+    private void updateBlockSubtitle() {
+        if (getSupportActionBar() != null) {
+            long syncHeight = store.getSyncHeight();
+            if (syncHeight >= 0) {
+                getSupportActionBar().setSubtitle(
+                        getString(R.string.current_block_subtitle, syncHeight)
+                );
+            } else {
+                getSupportActionBar().setSubtitle(null);
+            }
+        }
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        if (uiHandler != null && updater != null) {
+            uiHandler.removeCallbacks(updater);
+        }
     }
 
     private void applyFiltersAndSort() {

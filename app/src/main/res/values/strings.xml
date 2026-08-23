@@ -139,4 +139,6 @@
     <string name="dialog_import_warning_title">Import new wallet?</string>
     <string name="dialog_import_warning_message">This will erase the current wallet. Export your private key first if it has balance.</string>
     <string name="button_import_countdown">Wait %1$d s…</string>
+
+    <string name="current_block_subtitle">Current block: %1$d</string>
 </resources>

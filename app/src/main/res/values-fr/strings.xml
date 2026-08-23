@@ -139,4 +139,6 @@
     <string name="dialog_import_warning_title">Importer un nouveau portefeuille ?</string>
     <string name="dialog_import_warning_message">Cela effacera le portefeuille actuel. Exportez d\'abord votre clé privée s\'il contient un solde.</string>
     <string name="button_import_countdown">Attendez %1$d s…</string>
+
+    <string name="current_block_subtitle">Bloc actuel : %1$d</string>
 </resources>
