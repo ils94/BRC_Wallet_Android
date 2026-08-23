@@ -8,6 +8,8 @@ import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.Color;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Looper;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -38,13 +40,12 @@ public class MainActivity extends AppCompatActivity implements DialogManager.Wal
     private BRCApi api;
     private WalletOperations operations;
     private DialogManager dialogs;
-
     private TextView txtAddress, txtBalance, txtStatus;
     private ImageView imgQrCode;
     private Button btnCopy, btnShare;
-
     private EditText tempEdtTo;
-
+    private Handler uiHandler;
+    private Runnable balanceUpdater;
     private final ActivityResultLauncher<String> notificationPermissionLauncher =
             registerForActivityResult(new ActivityResultContracts.RequestPermission(), granted -> {
                 if (granted) {
@@ -92,6 +93,24 @@ public class MainActivity extends AppCompatActivity implements DialogManager.Wal
         btnShare.setOnClickListener(v -> shareAddress());
 
         updateUi();
+
+        uiHandler = new Handler(Looper.getMainLooper());
+        balanceUpdater = new Runnable() {
+            @Override
+            public void run() {
+                updateBalanceDisplay();
+                uiHandler.postDelayed(this, 1000);
+            }
+        };
+        uiHandler.post(balanceUpdater);
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        if (uiHandler != null && balanceUpdater != null) {
+            uiHandler.removeCallbacks(balanceUpdater);
+        }
     }
 
     @Override
@@ -219,6 +238,16 @@ public class MainActivity extends AppCompatActivity implements DialogManager.Wal
         );
     }
 
+    private void updateBalanceDisplay() {
+        if (store.hasWallet()) {
+            long balanceWei = store.getBalanceWei();
+            txtBalance.setText(getString(R.string.label_balance,
+                    TxBuilder.weiToBrc(balanceWei)));
+        } else {
+            txtBalance.setText(getString(R.string.label_balance_empty));
+        }
+    }
+
     private void updateUi() {
         if (store.hasWallet()) {
             byte[] pub = store.loadPublicKey();
@@ -274,7 +303,6 @@ public class MainActivity extends AppCompatActivity implements DialogManager.Wal
         if (!store.hasWallet()) return;
 
         String address = txtAddress.getText().toString();
-
         if (address.isEmpty() || address.equals(getString(R.string.label_no_wallet))) {
             toast(getString(R.string.toast_no_wallet));
             return;
