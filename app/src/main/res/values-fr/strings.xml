@@ -126,4 +126,13 @@
     <string name="label_txid">TxID:</string>
     <string name="label_from">De:</string>
     <string name="label_to">À:</string>
+
+    <string name="sort_height_desc">Hauteur (plus élevée d\'abord)</string>
+    <string name="sort_height_asc">Hauteur (plus basse d\'abord)</string>
+    <string name="sort_amount_desc">Montant (plus élevé d\'abord)</string>
+    <string name="sort_amount_asc">Montant (plus bas d\'abord)</string>
+
+    <string name="filter_all">Tous</string>
+    <string name="filter_sent">Envoyés</string>
+    <string name="filter_received">Reçus</string>
 </resources>

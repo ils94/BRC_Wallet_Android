@@ -8,6 +8,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
@@ -20,7 +21,7 @@ public class TransactionAdapter extends RecyclerView.Adapter<TransactionAdapter.
     private static final String TX_URL = "https://tabscope.netlify.app/#/tx/%1$s";
     private static final String ADDRESS_URL = "https://tabscope.netlify.app/#/account/%1$s";
 
-    private final List<TxRecord> transactions;
+    private List<TxRecord> transactions;
 
     public TransactionAdapter(List<TxRecord> transactions) {
         this.transactions = transactions;
@@ -77,14 +78,26 @@ public class TransactionAdapter extends RecyclerView.Adapter<TransactionAdapter.
         return transactions.size();
     }
 
+    @SuppressLint("NotifyDataSetChanged")
+    public void updateList(List<TxRecord> newList) {
+        this.transactions = newList;
+        notifyDataSetChanged();
+    }
+
     private String getTypeLabel(Context context, TxRecord.Type type) {
         switch (type) {
-            case SEND: return context.getString(R.string.tx_type_send);
-            case RECEIVE: return context.getString(R.string.tx_type_receive);
-            case MINE: return context.getString(R.string.tx_type_mine);
-            case LOCK: return context.getString(R.string.tx_type_lock);
-            case REDEEM: return context.getString(R.string.tx_type_redeem);
-            default: return "?";
+            case SEND:
+                return context.getString(R.string.tx_type_send);
+            case RECEIVE:
+                return context.getString(R.string.tx_type_receive);
+            case MINE:
+                return context.getString(R.string.tx_type_mine);
+            case LOCK:
+                return context.getString(R.string.tx_type_lock);
+            case REDEEM:
+                return context.getString(R.string.tx_type_redeem);
+            default:
+                return "?";
         }
     }
 
@@ -93,7 +106,7 @@ public class TransactionAdapter extends RecyclerView.Adapter<TransactionAdapter.
             Intent browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse(url));
             context.startActivity(browserIntent);
         } catch (Exception e) {
-            android.widget.Toast.makeText(context, "Cannot open link", android.widget.Toast.LENGTH_SHORT).show();
+            Toast.makeText(context, "Cannot open link", Toast.LENGTH_SHORT).show();
         }
     }
 
