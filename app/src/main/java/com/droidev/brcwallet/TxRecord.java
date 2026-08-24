@@ -9,6 +9,7 @@ public class TxRecord {
 
     public final Type type;
     public final long blockHeight;
+    public final long timestamp;
     public final String txid;
     public final String from;
     public final String to;
@@ -16,11 +17,12 @@ public class TxRecord {
     public final long feeWei;
     public final long nonce;
 
-    public TxRecord(Type type, long blockHeight, String txid,
+    public TxRecord(Type type, long blockHeight, long timestamp, String txid,
                     String from, String to,
                     long amountWei, long feeWei, long nonce) {
         this.type = type;
         this.blockHeight = blockHeight;
+        this.timestamp = timestamp;
         this.txid = txid;
         this.from = from;
         this.to = to;
@@ -33,6 +35,7 @@ public class TxRecord {
         JSONObject j = new JSONObject();
         j.put("type", type.name());
         j.put("height", blockHeight);
+        j.put("timestamp", timestamp);
         j.put("txid", txid == null ? "" : txid);
         j.put("from", from);
         j.put("to", to);
@@ -47,6 +50,7 @@ public class TxRecord {
         return new TxRecord(
                 t,
                 j.getLong("height"),
+                j.optLong("timestamp", 0),
                 j.optString("txid", ""),
                 j.getString("from"),
                 j.getString("to"),

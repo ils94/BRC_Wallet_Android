@@ -85,6 +85,8 @@ public final class ChainSync {
         ByteBuffer h = ByteBuffer.wrap(block).order(ByteOrder.BIG_ENDIAN);
 
         long height = h.getInt(0) & 0xFFFFFFFFL;
+        long timestamp = h.getLong(100);
+
         byte[] miner = new byte[32];
         h.position(116);
         h.get(miner);
@@ -114,14 +116,14 @@ public final class ChainSync {
                     s.balanceWei -= (amount + fee);
                     s.nonce = nonce + 1;
                     if (history != null) {
-                        history.add(new TxRecord(TxRecord.Type.SEND, height, txid,
+                        history.add(new TxRecord(TxRecord.Type.SEND, height, timestamp, txid,
                                 TxBuilder.toHex(from), TxBuilder.toHex(to), amount, fee, nonce));
                     }
                 }
                 if (isToUs && !isFromUs) {
                     s.balanceWei += amount;
                     if (history != null) {
-                        history.add(new TxRecord(TxRecord.Type.RECEIVE, height, txid,
+                        history.add(new TxRecord(TxRecord.Type.RECEIVE, height, timestamp, txid,
                                 TxBuilder.toHex(from), TxBuilder.toHex(to), amount, fee, nonce));
                     }
                 }
@@ -140,7 +142,7 @@ public final class ChainSync {
                     s.balanceWei -= (amount + fee);
                     s.nonce = nonce + 1;
                     if (history != null) {
-                        history.add(new TxRecord(TxRecord.Type.LOCK, height, txid,
+                        history.add(new TxRecord(TxRecord.Type.LOCK, height, timestamp, txid,
                                 TxBuilder.toHex(from), "", amount, fee, nonce));
                     }
                 }
@@ -166,7 +168,7 @@ public final class ChainSync {
                 if (Arrays.equals(to, ourAddr)) {
                     s.balanceWei += (amount - fee);
                     if (history != null) {
-                        history.add(new TxRecord(TxRecord.Type.REDEEM, height, txid,
+                        history.add(new TxRecord(TxRecord.Type.REDEEM, height, timestamp, txid,
                                 "", TxBuilder.toHex(to), amount, fee, 0));
                     }
                 }
@@ -183,7 +185,7 @@ public final class ChainSync {
             if (Arrays.equals(miner, ourAddr)) {
                 s.balanceWei += subsidy + blockFees;
                 if (history != null) {
-                    history.add(new TxRecord(TxRecord.Type.MINE, height, "",
+                    history.add(new TxRecord(TxRecord.Type.MINE, height, timestamp, "",
                             "", TxBuilder.toHex(miner), subsidy + blockFees, 0, 0));
                 }
             }

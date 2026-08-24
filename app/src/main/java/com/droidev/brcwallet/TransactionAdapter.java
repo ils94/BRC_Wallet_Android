@@ -13,6 +13,7 @@ import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
+import java.util.Date;
 import java.util.List;
 
 public class TransactionAdapter extends RecyclerView.Adapter<TransactionAdapter.ViewHolder> {
@@ -39,7 +40,7 @@ public class TransactionAdapter extends RecyclerView.Adapter<TransactionAdapter.
         return new ViewHolder(v);
     }
 
-    @SuppressLint("DefaultLocale")
+    @SuppressLint({"DefaultLocale", "SetTextI18n"})
     @Override
     public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
         Context context = holder.itemView.getContext();
@@ -48,14 +49,27 @@ public class TransactionAdapter extends RecyclerView.Adapter<TransactionAdapter.
         holder.txtType.setText(getTypeLabel(context, tx.type));
         holder.txtAmount.setText(TxBuilder.weiToBrc(tx.amountWei));
 
+        if (tx.timestamp > 0) {
+            java.text.DateFormat df = android.text.format.DateFormat.getMediumDateFormat(context);
+            java.text.DateFormat tf = android.text.format.DateFormat.getTimeFormat(context);
+            Date date = new Date(tx.timestamp * 1000L);
+            holder.txtTxDate.setText(df.format(date) + "  " + tf.format(date));
+            holder.txtTxDate.setVisibility(View.VISIBLE);
+        } else {
+            holder.txtTxDate.setText("");
+            holder.txtTxDate.setVisibility(View.GONE);
+        }
+
         String blockValue = String.valueOf(tx.blockHeight);
         holder.txtBlockValue.setText(blockValue);
-        holder.txtBlockValue.setOnClickListener(v -> openUrl(context, String.format(BLOCK_URL, tx.blockHeight)));
+        holder.txtBlockValue.setOnClickListener(v ->
+                openUrl(context, String.format(BLOCK_URL, tx.blockHeight)));
 
         String txid = (tx.txid == null || tx.txid.isEmpty()) ? "?" : tx.txid;
         holder.txtTxidValue.setText(txid);
         if (!txid.equals("?")) {
-            holder.txtTxidValue.setOnClickListener(v -> openUrl(context, String.format(TX_URL, txid)));
+            holder.txtTxidValue.setOnClickListener(v ->
+                    openUrl(context, String.format(TX_URL, txid)));
         } else {
             holder.txtTxidValue.setOnClickListener(null);
         }
@@ -65,7 +79,8 @@ public class TransactionAdapter extends RecyclerView.Adapter<TransactionAdapter.
         holder.txtFromValue.setText(fromDisplay);
         if (!fromAddress.equals("?")) {
             String finalFromAddress = fromAddress;
-            holder.txtFromValue.setOnClickListener(v -> openUrl(context, String.format(ADDRESS_URL, finalFromAddress)));
+            holder.txtFromValue.setOnClickListener(v ->
+                    openUrl(context, String.format(ADDRESS_URL, finalFromAddress)));
         } else {
             holder.txtFromValue.setOnClickListener(null);
         }
@@ -75,7 +90,8 @@ public class TransactionAdapter extends RecyclerView.Adapter<TransactionAdapter.
         holder.txtToValue.setText(toDisplay);
         if (!toAddress.equals("?")) {
             String finalToAddress = toAddress;
-            holder.txtToValue.setOnClickListener(v -> openUrl(context, String.format(ADDRESS_URL, finalToAddress)));
+            holder.txtToValue.setOnClickListener(v ->
+                    openUrl(context, String.format(ADDRESS_URL, finalToAddress)));
         } else {
             holder.txtToValue.setOnClickListener(null);
         }
@@ -137,13 +153,14 @@ public class TransactionAdapter extends RecyclerView.Adapter<TransactionAdapter.
     }
 
     static class ViewHolder extends RecyclerView.ViewHolder {
-        TextView txtType, txtAmount;
+        TextView txtType, txtAmount, txtTxDate;
         TextView txtBlockValue, txtTxidValue, txtFromValue, txtToValue;
 
         ViewHolder(View itemView) {
             super(itemView);
             txtType = itemView.findViewById(R.id.txtTxType);
             txtAmount = itemView.findViewById(R.id.txtTxAmount);
+            txtTxDate = itemView.findViewById(R.id.txtTxDate);
             txtBlockValue = itemView.findViewById(R.id.txtBlockValue);
             txtTxidValue = itemView.findViewById(R.id.txtTxidValue);
             txtFromValue = itemView.findViewById(R.id.txtFromValue);
