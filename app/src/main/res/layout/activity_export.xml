@@ -40,9 +40,12 @@
             android:layout_height="wrap_content"
             android:layout_marginTop="10dp"
             android:background="@drawable/bg_transaction"
+            android:clickable="true"
+            android:focusable="true"
+            android:foreground="?attr/selectableItemBackground"
             android:padding="14dp"
             android:textColor="#A7ADB5"
-            android:textIsSelectable="true"
+            android:textIsSelectable="false"
             android:textSize="13sp"
             android:typeface="monospace" />
 
@@ -82,9 +85,12 @@
             android:layout_height="wrap_content"
             android:layout_marginTop="10dp"
             android:background="@drawable/bg_transaction"
+            android:clickable="true"
+            android:focusable="true"
+            android:foreground="?attr/selectableItemBackground"
             android:padding="14dp"
             android:textColor="#A7ADB5"
-            android:textIsSelectable="true"
+            android:textIsSelectable="false"
             android:textSize="16sp"
             android:typeface="monospace" />
 

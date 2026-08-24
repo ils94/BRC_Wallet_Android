@@ -19,12 +19,20 @@ public class ExportActivity extends AppCompatActivity {
 
     public static final String EXTRA_PRIVATE_KEY = "extra_private_key";
 
+    private String privateKeyHex;
+    private String mnemonic;
+
+    private boolean privateKeyVisible = false;
+    private boolean mnemonicVisible = false;
+
+    private TextView txtPrivateKey;
+    private TextView txtMnemonic;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
         AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_YES);
-
         setContentView(R.layout.activity_export);
 
         getWindow().setFlags(
@@ -39,12 +47,12 @@ public class ExportActivity extends AppCompatActivity {
             return insets;
         });
 
-        TextView txtPrivateKey = findViewById(R.id.txtPrivateKey);
-        TextView txtMnemonic = findViewById(R.id.txtMnemonic);
+        txtPrivateKey = findViewById(R.id.txtPrivateKey);
+        txtMnemonic = findViewById(R.id.txtMnemonic);
         Button btnCopyPrivate = findViewById(R.id.btnCopyPrivate);
         Button btnCopyMnemonic = findViewById(R.id.btnCopyMnemonic);
 
-        String privateKeyHex = getIntent().getStringExtra(EXTRA_PRIVATE_KEY);
+        privateKeyHex = getIntent().getStringExtra(EXTRA_PRIVATE_KEY);
         if (privateKeyHex == null || privateKeyHex.isEmpty()) {
             Toast.makeText(this, R.string.toast_invalid_data, Toast.LENGTH_LONG).show();
             finish();
@@ -60,16 +68,47 @@ public class ExportActivity extends AppCompatActivity {
             return;
         }
 
-        txtPrivateKey.setText(privateKeyHex);
+        mnemonic = Bip39Helper.entropyToMnemonic(privateKeyBytes);
 
-        String mnemonic = Bip39Helper.entropyToMnemonic(privateKeyBytes);
-        txtMnemonic.setText(mnemonic);
+        updatePrivateKeyDisplay();
+        updateMnemonicDisplay();
+
+        txtPrivateKey.setOnClickListener(v -> {
+            privateKeyVisible = !privateKeyVisible;
+            updatePrivateKeyDisplay();
+        });
+
+        txtMnemonic.setOnClickListener(v -> {
+            mnemonicVisible = !mnemonicVisible;
+            updateMnemonicDisplay();
+        });
 
         btnCopyPrivate.setOnClickListener(v -> copyToClipboard(
                 getString(R.string.clipboard_label_private_key), privateKeyHex));
 
         btnCopyMnemonic.setOnClickListener(v -> copyToClipboard(
                 getString(R.string.clipboard_label_mnemonic), mnemonic));
+    }
+
+    private void updatePrivateKeyDisplay() {
+        if (privateKeyVisible) {
+            txtPrivateKey.setText(privateKeyHex);
+        } else {
+            txtPrivateKey.setText(censor(privateKeyHex));
+        }
+    }
+
+    private void updateMnemonicDisplay() {
+        if (mnemonicVisible) {
+            txtMnemonic.setText(mnemonic);
+        } else {
+            txtMnemonic.setText(censor(mnemonic));
+        }
+    }
+
+    private String censor(String value) {
+        if (value == null || value.isEmpty()) return "••••••••";
+        return "••••••••••••••••••••••••••••••••";
     }
 
     private void copyToClipboard(String label, String content) {
