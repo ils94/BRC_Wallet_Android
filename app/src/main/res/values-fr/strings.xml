@@ -126,6 +126,9 @@
     <string name="label_txid">TxID:</string>
     <string name="label_from">De:</string>
     <string name="label_to">À:</string>
+    <string name="label_coinbase">Coinbase</string>
+    <string name="label_script_lock">Script (Lock)</string>
+    <string name="label_script_redeem">Script (Redeem)</string>
 
     <string name="sort_height_desc">Hauteur (plus élevée d\'abord)</string>
     <string name="sort_height_asc">Hauteur (plus basse d\'abord)</string>
@@ -135,6 +138,9 @@
     <string name="filter_all">Tous</string>
     <string name="filter_sent">Envoyés</string>
     <string name="filter_received">Reçus</string>
+    <string name="filter_coinbase">Coinbase</string>
+    <string name="filter_lock">Lock</string>
+    <string name="filter_redeem">Redeem</string>
 
     <string name="dialog_import_warning_title">Importer un nouveau portefeuille ?</string>
     <string name="dialog_import_warning_message">Cela effacera le portefeuille actuel. Exportez d\'abord votre clé privée s\'il contient un solde.</string>

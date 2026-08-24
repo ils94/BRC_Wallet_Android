@@ -52,7 +52,6 @@ public class HistoryActivity extends AppCompatActivity {
         });
 
         RecyclerView recyclerView = findViewById(R.id.recyclerHistory);
-        TextView txtEmpty = findViewById(R.id.txtEmpty);
         Spinner spinnerSort = findViewById(R.id.spinnerSort);
         Spinner spinnerFilter = findViewById(R.id.spinnerFilter);
         autoCompleteContact = findViewById(R.id.autoCompleteContact);
@@ -120,7 +119,6 @@ public class HistoryActivity extends AppCompatActivity {
             applyFiltersAndSort();
         });
 
-        // Spinners
         ArrayAdapter<CharSequence> sortAdapter = ArrayAdapter.createFromResource(
                 this,
                 R.array.sort_options,
@@ -177,7 +175,8 @@ public class HistoryActivity extends AppCompatActivity {
     private Contact findContactByNameOrAddress(String query) {
         String lowerQuery = query.toLowerCase();
         for (Contact c : contactsStore.loadContacts()) {
-            if (c.name.toLowerCase().contains(lowerQuery) || c.address.toLowerCase().contains(lowerQuery)) {
+            if (c.name.toLowerCase().contains(lowerQuery)
+                    || c.address.toLowerCase().contains(lowerQuery)) {
                 return c;
             }
         }
@@ -215,25 +214,36 @@ public class HistoryActivity extends AppCompatActivity {
         List<TxRecord> filtered = new ArrayList<>();
 
         for (TxRecord tx : allTransactions) {
-            boolean include = false;
+            boolean include;
             switch (filterPos) {
-                case 0:
-                    include = true;
-                    break;
                 case 1:
                     include = (tx.type == TxRecord.Type.SEND);
                     break;
                 case 2:
                     include = (tx.type == TxRecord.Type.RECEIVE);
                     break;
+                case 3:
+                    include = (tx.type == TxRecord.Type.MINE);
+                    break;
+                case 4:
+                    include = (tx.type == TxRecord.Type.LOCK);
+                    break;
+                case 5:
+                    include = (tx.type == TxRecord.Type.REDEEM);
+                    break;
+                default:
+                    include = true;
+                    break;
             }
 
             if (include && contactFilterAddress != null) {
-                include = (tx.from.equalsIgnoreCase(contactFilterAddress)
-                        || tx.to.equalsIgnoreCase(contactFilterAddress));
+                include = tx.from.equalsIgnoreCase(contactFilterAddress)
+                        || tx.to.equalsIgnoreCase(contactFilterAddress);
             }
 
-            if (include) filtered.add(tx);
+            if (include) {
+                filtered.add(tx);
+            }
         }
 
         Comparator<TxRecord> comparator;

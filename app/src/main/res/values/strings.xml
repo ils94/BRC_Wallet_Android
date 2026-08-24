@@ -126,6 +126,9 @@
     <string name="label_txid">TxID:</string>
     <string name="label_from">From:</string>
     <string name="label_to">To:</string>
+    <string name="label_coinbase">Coinbase</string>
+    <string name="label_script_lock">Script (Lock)</string>
+    <string name="label_script_redeem">Script (Redeem)</string>
 
     <string name="sort_height_desc">Height (highest first)</string>
     <string name="sort_height_asc">Height (lowest first)</string>
@@ -135,6 +138,9 @@
     <string name="filter_all">All</string>
     <string name="filter_sent">Sent</string>
     <string name="filter_received">Received</string>
+    <string name="filter_coinbase">Coinbase</string>
+    <string name="filter_lock">Lock</string>
+    <string name="filter_redeem">Redeem</string>
 
     <string name="dialog_import_warning_title">Import new wallet?</string>
     <string name="dialog_import_warning_message">This will erase the current wallet. Export your private key first if it has balance.</string>

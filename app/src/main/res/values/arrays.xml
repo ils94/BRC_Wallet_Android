@@ -11,5 +11,8 @@
         <item>@string/filter_all</item>
         <item>@string/filter_sent</item>
         <item>@string/filter_received</item>
+        <item>@string/filter_coinbase</item>
+        <item>@string/filter_lock</item>
+        <item>@string/filter_redeem</item>
     </string-array>
 </resources>

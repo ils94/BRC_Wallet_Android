@@ -126,6 +126,9 @@
     <string name="label_txid">TxID:</string>
     <string name="label_from">Von:</string>
     <string name="label_to">An:</string>
+    <string name="label_coinbase">Coinbase</string>
+    <string name="label_script_lock">Script (Lock)</string>
+    <string name="label_script_redeem">Script (Redeem)</string>
 
     <string name="sort_height_desc">Höhe (höchste zuerst)</string>
     <string name="sort_height_asc">Höhe (niedrigste zuerst)</string>
@@ -135,6 +138,9 @@
     <string name="filter_all">Alle</string>
     <string name="filter_sent">Gesendet</string>
     <string name="filter_received">Empfangen</string>
+    <string name="filter_coinbase">Coinbase</string>
+    <string name="filter_lock">Lock</string>
+    <string name="filter_redeem">Redeem</string>
 
     <string name="dialog_import_warning_title">Neue Wallet importieren?</string>
     <string name="dialog_import_warning_message">Dadurch wird die aktuelle Wallet gelöscht. Exportieren Sie zuerst Ihren privaten Schlüssel, falls Guthaben vorhanden ist.</string>

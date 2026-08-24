@@ -22,6 +22,9 @@ public class TransactionAdapter extends RecyclerView.Adapter<TransactionAdapter.
     private static final String TX_URL = "https://tabscope.netlify.app/#/tx/%1$s";
     private static final String ADDRESS_URL = "https://tabscope.netlify.app/#/account/%1$s";
 
+    private static final int COLOR_LINK = 0xFF4FC3F7;
+    private static final int COLOR_MUTED = 0xFFA7ADB5;
+
     private List<TxRecord> transactions;
     private final ContactsStore contactsStore;
     private final String myAddress;
@@ -68,32 +71,54 @@ public class TransactionAdapter extends RecyclerView.Adapter<TransactionAdapter.
         String txid = (tx.txid == null || tx.txid.isEmpty()) ? "?" : tx.txid;
         holder.txtTxidValue.setText(txid);
         if (!txid.equals("?")) {
+            holder.txtTxidValue.setTextColor(COLOR_LINK);
             holder.txtTxidValue.setOnClickListener(v ->
                     openUrl(context, String.format(TX_URL, txid)));
         } else {
+            holder.txtTxidValue.setTextColor(COLOR_MUTED);
             holder.txtTxidValue.setOnClickListener(null);
         }
 
-        String fromAddress = tx.from.isEmpty() ? "?" : tx.from;
-        String fromDisplay = resolveDisplayAddress(context, fromAddress);
-        holder.txtFromValue.setText(fromDisplay);
-        if (!fromAddress.equals("?")) {
-            String finalFromAddress = fromAddress;
-            holder.txtFromValue.setOnClickListener(v ->
-                    openUrl(context, String.format(ADDRESS_URL, finalFromAddress)));
-        } else {
+        if (tx.type == TxRecord.Type.MINE) {
+            holder.txtFromValue.setText(context.getString(R.string.label_coinbase));
+            holder.txtFromValue.setTextColor(COLOR_MUTED);
             holder.txtFromValue.setOnClickListener(null);
+        } else if (tx.type == TxRecord.Type.REDEEM) {
+            holder.txtFromValue.setText(context.getString(R.string.label_script_redeem));
+            holder.txtFromValue.setTextColor(COLOR_MUTED);
+            holder.txtFromValue.setOnClickListener(null);
+        } else {
+            String fromAddress = tx.from.isEmpty() ? "?" : tx.from;
+            String fromDisplay = resolveDisplayAddress(context, fromAddress);
+            holder.txtFromValue.setText(fromDisplay);
+            if (!fromAddress.equals("?")) {
+                holder.txtFromValue.setTextColor(COLOR_LINK);
+                String finalFrom = fromAddress;
+                holder.txtFromValue.setOnClickListener(v ->
+                        openUrl(context, String.format(ADDRESS_URL, finalFrom)));
+            } else {
+                holder.txtFromValue.setTextColor(COLOR_MUTED);
+                holder.txtFromValue.setOnClickListener(null);
+            }
         }
 
-        String toAddress = tx.to.isEmpty() ? "?" : tx.to;
-        String toDisplay = resolveDisplayAddress(context, toAddress);
-        holder.txtToValue.setText(toDisplay);
-        if (!toAddress.equals("?")) {
-            String finalToAddress = toAddress;
-            holder.txtToValue.setOnClickListener(v ->
-                    openUrl(context, String.format(ADDRESS_URL, finalToAddress)));
-        } else {
+        if (tx.type == TxRecord.Type.LOCK) {
+            holder.txtToValue.setText(context.getString(R.string.label_script_lock));
+            holder.txtToValue.setTextColor(COLOR_MUTED);
             holder.txtToValue.setOnClickListener(null);
+        } else {
+            String toAddress = tx.to.isEmpty() ? "?" : tx.to;
+            String toDisplay = resolveDisplayAddress(context, toAddress);
+            holder.txtToValue.setText(toDisplay);
+            if (!toAddress.equals("?")) {
+                holder.txtToValue.setTextColor(COLOR_LINK);
+                String finalTo = toAddress;
+                holder.txtToValue.setOnClickListener(v ->
+                        openUrl(context, String.format(ADDRESS_URL, finalTo)));
+            } else {
+                holder.txtToValue.setTextColor(COLOR_MUTED);
+                holder.txtToValue.setOnClickListener(null);
+            }
         }
     }
 

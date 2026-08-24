@@ -126,6 +126,9 @@
     <string name="label_txid">TxID:</string>
     <string name="label_from">De:</string>
     <string name="label_to">Para:</string>
+    <string name="label_coinbase">Coinbase</string>
+    <string name="label_script_lock">Script (Lock)</string>
+    <string name="label_script_redeem">Script (Redeem)</string>
 
     <string name="sort_height_desc">Altura (maior primeiro)</string>
     <string name="sort_height_asc">Altura (menor primeiro)</string>
@@ -135,6 +138,9 @@
     <string name="filter_all">Todos</string>
     <string name="filter_sent">Enviados</string>
     <string name="filter_received">Recebidos</string>
+    <string name="filter_coinbase">Coinbase</string>
+    <string name="filter_lock">Lock</string>
+    <string name="filter_redeem">Redeem</string>
 
     <string name="dialog_import_warning_title">Importar nova carteira?</string>
     <string name="dialog_import_warning_message">Isso apagará a carteira atual. Exporte sua chave privada antes, se ela tiver saldo.</string>
