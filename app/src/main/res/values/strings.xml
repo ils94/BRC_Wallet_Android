@@ -188,4 +188,11 @@
 
     <string name="history_balance">Balance: %1$s</string>
     <string name="history_tx_count">%1$d transactions</string>
+
+    <string name="dialog_confirm_send_title">Confirm transaction</string>
+    <string name="label_recipient_address">Recipient</string>
+    <string name="label_amount">Amount</string>
+    <string name="label_fee">Fee</string>
+    <string name="button_hold_to_confirm">Hold to confirm</string>
+    <string name="button_hold_to_confirm_countdown">Hold to confirm (%1$d s)</string>
 </resources>

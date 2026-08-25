@@ -188,4 +188,11 @@
 
     <string name="history_balance">Saldo: %1$s</string>
     <string name="history_tx_count">%1$d transacciones</string>
+
+    <string name="dialog_confirm_send_title">Confirmar transacción</string>
+    <string name="label_recipient_address">Destinatario</string>
+    <string name="label_amount">Monto</string>
+    <string name="label_fee">Comisión</string>
+    <string name="button_hold_to_confirm">Mantén para confirmar</string>
+    <string name="button_hold_to_confirm_countdown">Mantén para confirmar (%1$d s)</string>
 </resources>

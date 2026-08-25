@@ -19,11 +19,12 @@
         android:id="@+id/txtContactName"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:layout_marginTop="10dp"
+        android:gravity="center"
         android:padding="5dp"
         android:textColor="#CCCCCC"
         android:textSize="20sp"
         android:textStyle="bold"
-        android:gravity="center"
         android:visibility="gone"
         tools:ignore="RtlSymmetry" />
 

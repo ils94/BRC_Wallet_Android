@@ -13,6 +13,7 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
+import android.view.MotionEvent;
 
 public class DialogManager {
 
@@ -269,6 +270,68 @@ public class DialogManager {
         dialog.show();
     }
 
+    @SuppressLint("ClickableViewAccessibility")
+    private void showConfirmSendDialog(byte[] to, long amountWei, long feeWei, String password, String contactName) {
+        @SuppressLint("InflateParams")
+        View view = LayoutInflater.from(context).inflate(R.layout.dialog_confirm_send, null);
+        TextView txtContactName = view.findViewById(R.id.txtContactName);
+        TextView txtRecipient = view.findViewById(R.id.txtRecipient);
+        TextView txtAmount = view.findViewById(R.id.txtAmount);
+        TextView txtFee = view.findViewById(R.id.txtFee);
+        Button btnHoldToConfirm = view.findViewById(R.id.btnHoldToConfirm);
+        TextView btnCancel = view.findViewById(R.id.btnCancel);
+
+        if (contactName != null && !contactName.isEmpty()) {
+            txtContactName.setText(contactName);
+            txtContactName.setVisibility(View.VISIBLE);
+        } else {
+            txtContactName.setVisibility(View.GONE);
+        }
+
+        txtRecipient.setText(TxBuilder.toHex(to));
+        txtAmount.setText(TxBuilder.weiToBrc(amountWei));
+        txtFee.setText(TxBuilder.weiToBrc(feeWei));
+
+        Dialog dialog = createStyledDialog(view);
+
+        Handler handler = new Handler(Looper.getMainLooper());
+        final boolean[] isSending = {false};
+
+        btnHoldToConfirm.setOnTouchListener((v, event) -> {
+            switch (event.getAction()) {
+                case MotionEvent.ACTION_DOWN:
+                    if (isSending[0]) return true;
+                    handler.removeCallbacksAndMessages(null);
+                    handler.post(new Runnable() {
+                        int countdown = 5;
+
+                        @Override
+                        public void run() {
+                            if (countdown > 0) {
+                                btnHoldToConfirm.setText(context.getString(R.string.button_hold_to_confirm_countdown, countdown));
+                                countdown--;
+                                handler.postDelayed(this, 1000);
+                            } else {
+                                isSending[0] = true;
+                                dialog.dismiss();
+                                callback.onSendRequested(to, amountWei, feeWei, password);
+                            }
+                        }
+                    });
+                    return true;
+                case MotionEvent.ACTION_UP:
+                case MotionEvent.ACTION_CANCEL:
+                    handler.removeCallbacksAndMessages(null);
+                    btnHoldToConfirm.setText(R.string.button_hold_to_confirm);
+                    return true;
+            }
+            return false;
+        });
+
+        btnCancel.setOnClickListener(v -> dialog.dismiss());
+        dialog.show();
+    }
+
     public void showSendDialog() {
         showSendDialogInternal(null);
     }
@@ -345,8 +408,16 @@ public class DialogManager {
                     }
                 }
 
+                String contactName = null;
+                for (Contact c : contactsStore.loadContacts()) {
+                    if (c.address.equalsIgnoreCase(TxBuilder.toHex(to))) {
+                        contactName = c.name;
+                        break;
+                    }
+                }
+
                 dialog.dismiss();
-                callback.onSendRequested(to, amountWei, feeWei, password);
+                showConfirmSendDialog(to, amountWei, feeWei, password, contactName);
             } catch (Exception e) {
                 toast(context.getString(R.string.toast_invalid_data, e.getMessage()));
             }
