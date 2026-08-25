@@ -193,6 +193,7 @@
     <string name="label_recipient_address">Recipient</string>
     <string name="label_amount">Amount</string>
     <string name="label_fee">Fee</string>
-    <string name="button_hold_to_confirm">Hold to confirm</string>
-    <string name="button_hold_to_confirm_countdown">Hold to confirm (%1$d s)</string>
+    <string name="confirm_switch_label">I reviewed the transaction details</string>
+    <string name="slide_to_confirm">Slide to confirm</string>
+    <string name="slide_to_confirm_disabled">Enable the switch to slide</string>
 </resources>

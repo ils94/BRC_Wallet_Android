@@ -193,6 +193,7 @@
     <string name="label_recipient_address">Destinatário</string>
     <string name="label_amount">Valor</string>
     <string name="label_fee">Taxa</string>
-    <string name="button_hold_to_confirm">Segure para confirmar</string>
-    <string name="button_hold_to_confirm_countdown">Segure para confirmar (%1$d s)</string>
+    <string name="confirm_switch_label">Revisei os detalhes da transação</string>
+    <string name="slide_to_confirm">Deslize para confirmar</string>
+    <string name="slide_to_confirm_disabled">Ative o interruptor para deslizar</string>
 </resources>

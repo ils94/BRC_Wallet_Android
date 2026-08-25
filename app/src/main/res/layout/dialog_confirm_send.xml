@@ -83,26 +83,40 @@
         android:textColor="#F5F5F5"
         android:textSize="14sp" />
 
-    <androidx.appcompat.widget.AppCompatButton
-        android:id="@+id/btnHoldToConfirm"
+    <androidx.appcompat.widget.SwitchCompat
+        android:id="@+id/switchConfirm"
         android:layout_width="match_parent"
-        android:layout_height="50dp"
+        android:layout_height="wrap_content"
         android:layout_marginTop="20dp"
-        android:background="@drawable/button_primary"
-        android:stateListAnimator="@null"
-        android:text="@string/button_hold_to_confirm"
-        android:textAllCaps="false"
-        android:textColor="#FFFFFF"
-        android:textSize="14sp"
-        android:textStyle="bold"
-        tools:ignore="TouchTargetSizeCheck" />
+        android:text="@string/confirm_switch_label"
+        android:textColor="#F5F5F5"
+        android:textSize="14sp" />
+
+    <SeekBar
+        android:id="@+id/seekBarConfirm"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="10dp"
+        android:contentDescription="@string/slide_to_confirm"
+        android:enabled="false"
+        android:max="100"
+        android:progress="0" />
+
+    <TextView
+        android:id="@+id/txtSlideHint"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center"
+        android:text="@string/slide_to_confirm"
+        android:textColor="#777D86"
+        android:textSize="13sp" />
 
     <TextView
         android:id="@+id/btnCancel"
         android:layout_width="wrap_content"
         android:layout_height="48dp"
         android:layout_gravity="center_horizontal"
-        android:layout_marginTop="4dp"
+        android:layout_marginTop="8dp"
         android:gravity="center"
         android:paddingStart="20dp"
         android:paddingEnd="20dp"

@@ -193,6 +193,7 @@
     <string name="label_recipient_address">Destinatario</string>
     <string name="label_amount">Monto</string>
     <string name="label_fee">Comisión</string>
-    <string name="button_hold_to_confirm">Mantén para confirmar</string>
-    <string name="button_hold_to_confirm_countdown">Mantén para confirmar (%1$d s)</string>
+    <string name="confirm_switch_label">He revisado los detalles de la transacción</string>
+    <string name="slide_to_confirm">Desliza para confirmar</string>
+    <string name="slide_to_confirm_disabled">Activa el interruptor para deslizar</string>
 </resources>

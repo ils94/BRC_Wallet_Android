@@ -11,9 +11,11 @@ import android.view.Window;
 import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.SeekBar;
 import android.widget.TextView;
 import android.widget.Toast;
-import android.view.MotionEvent;
+
+import androidx.appcompat.widget.SwitchCompat;
 
 public class DialogManager {
 
@@ -278,7 +280,9 @@ public class DialogManager {
         TextView txtRecipient = view.findViewById(R.id.txtRecipient);
         TextView txtAmount = view.findViewById(R.id.txtAmount);
         TextView txtFee = view.findViewById(R.id.txtFee);
-        Button btnHoldToConfirm = view.findViewById(R.id.btnHoldToConfirm);
+        SwitchCompat switchConfirm = view.findViewById(R.id.switchConfirm);
+        SeekBar seekBarConfirm = view.findViewById(R.id.seekBarConfirm);
+        TextView txtSlideHint = view.findViewById(R.id.txtSlideHint);
         TextView btnCancel = view.findViewById(R.id.btnCancel);
 
         if (contactName != null && !contactName.isEmpty()) {
@@ -294,38 +298,50 @@ public class DialogManager {
 
         Dialog dialog = createStyledDialog(view);
 
-        Handler handler = new Handler(Looper.getMainLooper());
-        final boolean[] isSending = {false};
+        seekBarConfirm.setEnabled(false);
+        seekBarConfirm.setAlpha(0.5f);
+        txtSlideHint.setText(R.string.slide_to_confirm_disabled);
 
-        btnHoldToConfirm.setOnTouchListener((v, event) -> {
-            switch (event.getAction()) {
-                case MotionEvent.ACTION_DOWN:
-                    if (isSending[0]) return true;
-                    handler.removeCallbacksAndMessages(null);
-                    handler.post(new Runnable() {
-                        int countdown = 5;
-
-                        @Override
-                        public void run() {
-                            if (countdown > 0) {
-                                btnHoldToConfirm.setText(context.getString(R.string.button_hold_to_confirm_countdown, countdown));
-                                countdown--;
-                                handler.postDelayed(this, 1000);
-                            } else {
-                                isSending[0] = true;
-                                dialog.dismiss();
-                                callback.onSendRequested(to, amountWei, feeWei, password);
-                            }
-                        }
-                    });
-                    return true;
-                case MotionEvent.ACTION_UP:
-                case MotionEvent.ACTION_CANCEL:
-                    handler.removeCallbacksAndMessages(null);
-                    btnHoldToConfirm.setText(R.string.button_hold_to_confirm);
-                    return true;
+        switchConfirm.setOnCheckedChangeListener((buttonView, isChecked) -> {
+            seekBarConfirm.setEnabled(isChecked);
+            seekBarConfirm.setAlpha(isChecked ? 1.0f : 0.5f);
+            if (!isChecked) {
+                seekBarConfirm.setProgress(0);
+                txtSlideHint.setText(R.string.slide_to_confirm_disabled);
+            } else {
+                txtSlideHint.setText(R.string.slide_to_confirm);
             }
-            return false;
+        });
+
+        seekBarConfirm.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
+            @Override
+            public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
+                if (fromUser && progress >= 100 && switchConfirm.isChecked()) {
+                    dialog.dismiss();
+                    callback.onSendRequested(to, amountWei, feeWei, password);
+                }
+            }
+
+            @Override
+            public void onStartTrackingTouch(SeekBar seekBar) {
+                if (!switchConfirm.isChecked()) {
+                    seekBar.setProgress(0);
+                }
+            }
+
+            @Override
+            public void onStopTrackingTouch(SeekBar seekBar) {
+                if (switchConfirm.isChecked() && seekBar.getProgress() >= 100) {
+                    dialog.dismiss();
+                    callback.onSendRequested(to, amountWei, feeWei, password);
+                } else if (!switchConfirm.isChecked()) {
+                    seekBar.setProgress(0);
+                    txtSlideHint.setText(R.string.slide_to_confirm_disabled);
+                } else {
+                    seekBar.setProgress(0);
+                    txtSlideHint.setText(R.string.slide_to_confirm);
+                }
+            }
         });
 
         btnCancel.setOnClickListener(v -> dialog.dismiss());
@@ -599,8 +615,6 @@ public class DialogManager {
         btnCancel.setOnClickListener(v -> dialog.dismiss());
         dialog.show();
     }
-
-    // ===================== HELPERS =====================
 
     private Dialog createStyledDialog(View view) {
         Dialog dialog = new Dialog(context);

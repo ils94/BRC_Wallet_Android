@@ -193,6 +193,7 @@
     <string name="label_recipient_address">Empfänger</string>
     <string name="label_amount">Betrag</string>
     <string name="label_fee">Gebühr</string>
-    <string name="button_hold_to_confirm">Zum Bestätigen halten</string>
-    <string name="button_hold_to_confirm_countdown">Zum Bestätigen halten (%1$d s)</string>
+    <string name="confirm_switch_label">Ich habe die Transaktionsdetails überprüft</string>
+    <string name="slide_to_confirm">Zum Bestätigen schieben</string>
+    <string name="slide_to_confirm_disabled">Aktivieren Sie den Schalter, um zu schieben</string>
 </resources>
