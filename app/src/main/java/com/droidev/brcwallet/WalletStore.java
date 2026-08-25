@@ -4,14 +4,9 @@ import android.content.Context;
 import android.content.SharedPreferences;
 import android.util.Base64;
 
-import org.json.JSONArray;
-
 import java.security.SecureRandom;
 import java.security.spec.KeySpec;
-import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 
 import javax.crypto.Cipher;
 import javax.crypto.SecretKey;
@@ -32,17 +27,23 @@ public final class WalletStore {
     private static final String KEY_NONCE = "nonce";
     private static final String KEY_API = "api_base";
     private static final String KEY_HAS_PASSWORD = "has_password";
-    private static final String KEY_HISTORY = "tx_history";
+
+    private static final String KEY_HISTORY_LEGACY = "tx_history";
 
     private static final int PBKDF2_ITERATIONS = 100_000;
     private static final int SALT_SIZE_BYTES = 16;
-    private static final int MAX_HISTORY = 500;
 
     private final SharedPreferences prefs;
+    private final HistoryDatabase historyDb;
 
     public WalletStore(Context ctx) {
-        prefs = ctx.getApplicationContext()
-                .getSharedPreferences(PREFS, Context.MODE_PRIVATE);
+        Context app = ctx.getApplicationContext();
+        prefs = app.getSharedPreferences(PREFS, Context.MODE_PRIVATE);
+        historyDb = new HistoryDatabase(app);
+
+        if (prefs.contains(KEY_HISTORY_LEGACY)) {
+            prefs.edit().remove(KEY_HISTORY_LEGACY).apply();
+        }
     }
 
     public boolean hasWallet() {
@@ -118,48 +119,26 @@ public final class WalletStore {
                 .putLong(KEY_BALANCE, 0L)
                 .putLong(KEY_NONCE, 0L)
                 .apply();
+        historyDb.clearAll();
     }
 
+
     public void saveHistory(List<TxRecord> history) {
-        if (history == null || history.isEmpty()) return;
-        try {
-            List<TxRecord> existing = loadHistory();
-            Set<String> seen = new HashSet<>();
-            JSONArray arr = new JSONArray();
-            for (TxRecord r : existing) {
-                String key = r.toJson().toString();
-                if (seen.add(key)) arr.put(r.toJson());
-            }
-            for (TxRecord r : history) {
-                String key = r.toJson().toString();
-                if (seen.add(key)) arr.put(r.toJson());
-            }
-            while (arr.length() > MAX_HISTORY) {
-                arr.remove(0);
-            }
-            prefs.edit().putString(KEY_HISTORY, arr.toString()).apply();
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+        historyDb.insertAll(history);
     }
 
     public List<TxRecord> loadHistory() {
-        List<TxRecord> list = new ArrayList<>();
-        String json = prefs.getString(KEY_HISTORY, null);
-        if (json == null) return list;
-        try {
-            JSONArray arr = new JSONArray(json);
-            for (int i = 0; i < arr.length(); i++) {
-                list.add(TxRecord.fromJson(arr.getJSONObject(i)));
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        return list;
+        return historyDb.loadAll();
     }
 
+    public void clearHistory() {
+        historyDb.clearAll();
+    }
+
+
     public String getApiBase() {
-        return prefs.getString(KEY_API, "https://api1.browsercoin.org,https://api2.browsercoin.org,https://api1.taitech.eu,https://brc-api.solodragonsden.fun");
+        return prefs.getString(KEY_API,
+                "https://api1.browsercoin.org,https://api2.browsercoin.org,https://api1.taitech.eu,https://brc-api.solodragonsden.fun");
     }
 
     public void setApiBase(String url) {
@@ -177,9 +156,5 @@ public final class WalletStore {
         byte[] b = new byte[WalletStore.SALT_SIZE_BYTES];
         new SecureRandom().nextBytes(b);
         return b;
-    }
-
-    public void clearHistory() {
-        prefs.edit().remove(KEY_HISTORY).apply();
     }
 }
