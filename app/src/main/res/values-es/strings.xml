@@ -185,4 +185,7 @@
     <string name="notification_incoming_title">BRC recibido</string>
     <string name="notification_incoming_text">Has recibido %1$s</string>
     <string name="notification_tx_details">Bloque: %1$d\nDe: %2$s\nCantidad: %3$s</string>
+
+    <string name="history_balance">Saldo: %1$s</string>
+    <string name="history_tx_count">%1$d transacciones</string>
 </resources>

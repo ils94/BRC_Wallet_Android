@@ -35,6 +35,8 @@ public class HistoryActivity extends AppCompatActivity {
 
     private AutoCompleteTextView autoCompleteContact;
     private ImageButton btnClearContactFilter;
+    private TextView txtHistoryBalance;
+    private TextView txtHistoryCount;
 
     private String contactFilterAddress = null;
 
@@ -58,6 +60,8 @@ public class HistoryActivity extends AppCompatActivity {
         Spinner spinnerFilter = findViewById(R.id.spinnerFilter);
         autoCompleteContact = findViewById(R.id.autoCompleteContact);
         btnClearContactFilter = findViewById(R.id.btnClearContactFilter);
+        txtHistoryBalance = findViewById(R.id.txtHistoryBalance);
+        txtHistoryCount = findViewById(R.id.txtHistoryCount);
 
         store = new WalletStore(this);
         allTransactions = store.loadHistory();
@@ -159,6 +163,7 @@ public class HistoryActivity extends AppCompatActivity {
             }
         });
 
+        updateSummary();
         applyFiltersAndSort();
 
         uiHandler = new Handler(Looper.getMainLooper());
@@ -167,11 +172,19 @@ public class HistoryActivity extends AppCompatActivity {
             public void run() {
                 updateBlockSubtitle();
                 allTransactions = store.loadHistory();
+                updateSummary();
                 applyFiltersAndSort();
                 uiHandler.postDelayed(this, 1000);
             }
         };
         uiHandler.post(updater);
+    }
+
+    private void updateSummary() {
+        String balance = TxBuilder.weiToBrc(store.getBalanceWei());
+        txtHistoryBalance.setText(getString(R.string.history_balance, balance));
+        int total = allTransactions != null ? allTransactions.size() : 0;
+        txtHistoryCount.setText(getString(R.string.history_tx_count, total));
     }
 
     private Contact findContactByNameOrAddress(String query) {
@@ -277,10 +290,9 @@ public class HistoryActivity extends AppCompatActivity {
         }
     }
 
-    @SuppressLint("GestureBackNavigation")
+    @SuppressLint({"GestureBackNavigation", "MissingSuperCall"})
     @Override
     public void onBackPressed() {
-        super.onBackPressed();
         Intent intent = new Intent(this, MainActivity.class);
         intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP);
         startActivity(intent);
