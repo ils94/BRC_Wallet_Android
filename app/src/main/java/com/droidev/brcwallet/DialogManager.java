@@ -47,11 +47,13 @@ public class DialogManager {
     private final WalletActionCallback callback;
     private ContactActionCallback contactCallback;
     private ScannerCallback scanCallback;
+    private final ContactsStore contactsStore;
 
     public DialogManager(Context context, WalletStore store, WalletActionCallback callback) {
         this.context = context;
         this.store = store;
         this.callback = callback;
+        this.contactsStore = new ContactsStore(context);
     }
 
     public void setContactCallback(ContactActionCallback contactCallback) {
@@ -283,6 +285,7 @@ public class DialogManager {
 
         @SuppressLint("InflateParams")
         View view = LayoutInflater.from(context).inflate(R.layout.dialog_send, null);
+        TextView txtContactName = view.findViewById(R.id.txtContactName);
         EditText edtTo = view.findViewById(R.id.edtTo);
         EditText edtAmount = view.findViewById(R.id.edtAmount);
         EditText edtFee = view.findViewById(R.id.edtFee);
@@ -293,6 +296,21 @@ public class DialogManager {
 
         if (prefillAddress != null && !prefillAddress.isEmpty()) {
             edtTo.setText(prefillAddress);
+
+            String contactName = null;
+            for (Contact c : contactsStore.loadContacts()) {
+                if (c.address.equalsIgnoreCase(prefillAddress)) {
+                    contactName = c.name;
+                    break;
+                }
+            }
+
+            if (contactName != null) {
+                txtContactName.setText(contactName);
+                txtContactName.setVisibility(View.VISIBLE);
+            } else {
+                txtContactName.setVisibility(View.GONE);
+            }
         }
 
         Dialog dialog = createStyledDialog(view);
