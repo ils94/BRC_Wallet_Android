@@ -144,11 +144,18 @@ public class BackgroundSyncService extends Service {
     }
 
     private PendingIntent getHistoryActivityPendingIntent() {
-        TaskStackBuilder stackBuilder = TaskStackBuilder.create(this);
-        stackBuilder.addNextIntent(new Intent(this, MainActivity.class));
-        stackBuilder.addNextIntent(new Intent(this, HistoryActivity.class));
-        return stackBuilder.getPendingIntent(
-                1, PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE);
+        Intent mainIntent = new Intent(this, MainActivity.class);
+        mainIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP);
+
+        Intent historyIntent = new Intent(this, HistoryActivity.class);
+
+        return TaskStackBuilder.create(this)
+                .addNextIntent(mainIntent)
+                .addNextIntent(historyIntent)
+                .getPendingIntent(
+                        1,
+                        PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE
+                );
     }
 
     private void createNotificationChannels() {
