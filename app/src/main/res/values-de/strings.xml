@@ -196,4 +196,6 @@
     <string name="confirm_switch_label">Ich habe die Transaktionsdetails überprüft</string>
     <string name="slide_to_confirm">Zum Bestätigen schieben</string>
     <string name="slide_to_confirm_disabled">Aktivieren Sie den Schalter, um zu schieben</string>
+
+    <string name="button_confirm">Bestätigen</string>
 </resources>

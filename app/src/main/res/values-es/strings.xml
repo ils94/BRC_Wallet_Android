@@ -196,4 +196,6 @@
     <string name="confirm_switch_label">He revisado los detalles de la transacción</string>
     <string name="slide_to_confirm">Desliza para confirmar</string>
     <string name="slide_to_confirm_disabled">Activa el interruptor para deslizar</string>
+
+    <string name="button_confirm">Confirmar</string>
 </resources>

@@ -196,4 +196,6 @@
     <string name="confirm_switch_label">J\'ai vérifié les détails de la transaction</string>
     <string name="slide_to_confirm">Faites glisser pour confirmer</string>
     <string name="slide_to_confirm_disabled">Activez l\'interrupteur pour faire glisser</string>
+
+    <string name="button_confirm">Confirmer</string>
 </resources>

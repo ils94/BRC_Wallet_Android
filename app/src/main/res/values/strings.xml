@@ -196,4 +196,6 @@
     <string name="confirm_switch_label">I reviewed the transaction details</string>
     <string name="slide_to_confirm">Slide to confirm</string>
     <string name="slide_to_confirm_disabled">Enable the switch to slide</string>
+
+    <string name="button_confirm">Confirm</string>
 </resources>

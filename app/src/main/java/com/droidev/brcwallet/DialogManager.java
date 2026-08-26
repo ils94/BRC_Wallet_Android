@@ -272,8 +272,37 @@ public class DialogManager {
         dialog.show();
     }
 
+    private void showPasswordConfirmDialog(byte[] to, long amountWei, long feeWei) {
+        @SuppressLint("InflateParams")
+        View view = LayoutInflater.from(context).inflate(R.layout.dialog_password_confirm, null);
+        EditText edtPasswordConfirm = view.findViewById(R.id.edtPasswordConfirm);
+        Button btnConfirmPassword = view.findViewById(R.id.btnConfirmPassword);
+        TextView btnCancelPassword = view.findViewById(R.id.btnCancelPassword);
+
+        Dialog dialog = createStyledDialog(view);
+
+        btnConfirmPassword.setOnClickListener(v -> {
+            String password = edtPasswordConfirm.getText().toString();
+            if (password.isEmpty()) {
+                toast(context.getString(R.string.toast_enter_password_to_send));
+                return;
+            }
+
+            try {
+                store.loadPrivateKey(password);
+                dialog.dismiss();
+                callback.onSendRequested(to, amountWei, feeWei, password);
+            } catch (Exception e) {
+                toast(context.getString(R.string.toast_wrong_password));
+            }
+        });
+
+        btnCancelPassword.setOnClickListener(v -> dialog.dismiss());
+        dialog.show();
+    }
+
     @SuppressLint("ClickableViewAccessibility")
-    private void showConfirmSendDialog(byte[] to, long amountWei, long feeWei, String password, String contactName) {
+    private void showConfirmSendDialog(byte[] to, long amountWei, long feeWei, String contactName) {
         @SuppressLint("InflateParams")
         View view = LayoutInflater.from(context).inflate(R.layout.dialog_confirm_send, null);
         TextView txtContactName = view.findViewById(R.id.txtContactName);
@@ -316,10 +345,6 @@ public class DialogManager {
         seekBarConfirm.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
             @Override
             public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
-                if (fromUser && progress >= 100 && switchConfirm.isChecked()) {
-                    dialog.dismiss();
-                    callback.onSendRequested(to, amountWei, feeWei, password);
-                }
             }
 
             @Override
@@ -333,7 +358,7 @@ public class DialogManager {
             public void onStopTrackingTouch(SeekBar seekBar) {
                 if (switchConfirm.isChecked() && seekBar.getProgress() >= 100) {
                     dialog.dismiss();
-                    callback.onSendRequested(to, amountWei, feeWei, password);
+                    showPasswordConfirmDialog(to, amountWei, feeWei);
                 } else if (!switchConfirm.isChecked()) {
                     seekBar.setProgress(0);
                     txtSlideHint.setText(R.string.slide_to_confirm_disabled);
@@ -368,14 +393,12 @@ public class DialogManager {
         EditText edtTo = view.findViewById(R.id.edtTo);
         EditText edtAmount = view.findViewById(R.id.edtAmount);
         EditText edtFee = view.findViewById(R.id.edtFee);
-        EditText edtPassword = view.findViewById(R.id.edtPassword);
         Button btnScan = view.findViewById(R.id.btnScan);
         Button btnSend = view.findViewById(R.id.btnSend);
         TextView btnCancel = view.findViewById(R.id.btnCancel);
 
         if (prefillAddress != null && !prefillAddress.isEmpty()) {
             edtTo.setText(prefillAddress);
-
             String contactName = null;
             for (Contact c : contactsStore.loadContacts()) {
                 if (c.address.equalsIgnoreCase(prefillAddress)) {
@@ -383,7 +406,6 @@ public class DialogManager {
                     break;
                 }
             }
-
             if (contactName != null) {
                 txtContactName.setText(contactName);
                 txtContactName.setVisibility(View.VISIBLE);
@@ -408,12 +430,6 @@ public class DialogManager {
                 }
 
                 long amountWei = TxBuilder.brcToWei(edtAmount.getText().toString());
-                String password = edtPassword.getText().toString();
-
-                if (password.isEmpty()) {
-                    toast(context.getString(R.string.toast_enter_password_to_send));
-                    return;
-                }
 
                 long feeWei = TxBuilder.MIN_FEE;
                 String feeText = edtFee.getText().toString().trim();
@@ -433,7 +449,7 @@ public class DialogManager {
                 }
 
                 dialog.dismiss();
-                showConfirmSendDialog(to, amountWei, feeWei, password, contactName);
+                showConfirmSendDialog(to, amountWei, feeWei, contactName);
             } catch (Exception e) {
                 toast(context.getString(R.string.toast_invalid_data, e.getMessage()));
             }
