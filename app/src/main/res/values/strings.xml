@@ -198,4 +198,12 @@
     <string name="slide_to_confirm_disabled">Enable the switch to slide</string>
 
     <string name="button_confirm">Confirm</string>
+
+    <string name="channel_sync_name">Automatic synchronization</string>
+    <string name="channel_sync_desc">Keeps balance and history up to date</string>
+    <string name="channel_tx_name">Incoming transactions</string>
+    <string name="channel_tx_desc">Notifications for received BRC</string>
+    <string name="notification_sync_title">BRC Wallet</string>
+    <string name="notification_sync_active">Automatic synchronization active</string>
+    <string name="notification_syncing">Synchronizing…</string>
 </resources>

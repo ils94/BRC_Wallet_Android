@@ -198,4 +198,12 @@
     <string name="slide_to_confirm_disabled">Aktivieren Sie den Schalter, um zu schieben</string>
 
     <string name="button_confirm">Bestätigen</string>
+
+    <string name="channel_sync_name">Automatische Synchronisierung</string>
+    <string name="channel_sync_desc">Hält Guthaben und Verlauf auf dem neuesten Stand</string>
+    <string name="channel_tx_name">Eingehende Transaktionen</string>
+    <string name="channel_tx_desc">Benachrichtigungen über empfangene BRC</string>
+    <string name="notification_sync_title">BRC Wallet</string>
+    <string name="notification_sync_active">Automatische Synchronisierung aktiv</string>
+    <string name="notification_syncing">Synchronisierung…</string>
 </resources>

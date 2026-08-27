@@ -198,4 +198,12 @@
     <string name="slide_to_confirm_disabled">Activa el interruptor para deslizar</string>
 
     <string name="button_confirm">Confirmar</string>
+
+    <string name="channel_sync_name">Sincronización automática</string>
+    <string name="channel_sync_desc">Mantiene el saldo y el historial actualizados</string>
+    <string name="channel_tx_name">Transacciones recibidas</string>
+    <string name="channel_tx_desc">Notificaciones de BRC recibidos</string>
+    <string name="notification_sync_title">BRC Wallet</string>
+    <string name="notification_sync_active">Sincronización automática activa</string>
+    <string name="notification_syncing">Sincronizando…</string>
 </resources>

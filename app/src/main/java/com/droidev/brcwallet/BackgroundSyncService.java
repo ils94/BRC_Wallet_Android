@@ -18,13 +18,14 @@ import java.util.List;
 
 public class BackgroundSyncService extends Service {
 
-    private static final String CHANNEL_ID = "brc_wallet_sync";
+    private static final String CHANNEL_ID = "brc_wallet_sync_v2";
     private static final String CHANNEL_ID_TX = "brc_wallet_tx";
     private static final int NOTIFICATION_ID = 1001;
     private static final int TX_NOTIFICATION_BASE_ID = 2000;
 
     private static final long SYNC_INTERVAL_MS = 60_000;
     private static final long RETRY_DELAY_MS = 5_000;
+    private static final long TX_NOTIFY_DELAY_MS = 800;
 
     private Handler handler;
     private WalletOperations operations;
@@ -48,11 +49,14 @@ public class BackgroundSyncService extends Service {
 
         createNotificationChannels();
 
+        Notification startNotification = buildSyncNotification(
+                getString(R.string.notification_sync_active));
+
         if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.Q) {
-            startForeground(NOTIFICATION_ID, buildNotification("Automatic synchronization active"),
+            startForeground(NOTIFICATION_ID, startNotification,
                     ServiceInfo.FOREGROUND_SERVICE_TYPE_DATA_SYNC);
         } else {
-            startForeground(NOTIFICATION_ID, buildNotification("Automatic synchronization active"));
+            startForeground(NOTIFICATION_ID, startNotification);
         }
 
         scheduleNextSync(0);
@@ -70,13 +74,14 @@ public class BackgroundSyncService extends Service {
         if (isSyncing) return;
 
         isSyncing = true;
-        updateNotification("Synchronizing...");
+        updateSyncNotification(getString(R.string.notification_syncing));
 
         operations.refreshBalance(
-                this::updateNotification,
+                progress -> {
+                },
                 (success, message) -> {
                     isSyncing = false;
-                    updateNotification(message);
+                    updateSyncNotification(getString(R.string.notification_sync_active));
 
                     if (success) {
                         scheduleNextSync(SYNC_INTERVAL_MS);
@@ -91,11 +96,13 @@ public class BackgroundSyncService extends Service {
     private void handleNewTransactions(List<TxRecord> txs, boolean isFirstSync) {
         if (isFirstSync || txs == null || txs.isEmpty()) return;
 
-        for (TxRecord tx : txs) {
-            if (tx.type == TxRecord.Type.RECEIVE && tx.amountWei > 0) {
-                showIncomingTxNotification(tx);
+        handler.postDelayed(() -> {
+            for (TxRecord tx : txs) {
+                if (tx.type == TxRecord.Type.RECEIVE && tx.amountWei > 0) {
+                    showIncomingTxNotification(tx);
+                }
             }
-        }
+        }, TX_NOTIFY_DELAY_MS);
     }
 
     private String resolveAddressDisplay(String address) {
@@ -128,19 +135,23 @@ public class BackgroundSyncService extends Service {
                 .setContentText(getString(R.string.notification_incoming_text, amount))
                 .setStyle(new NotificationCompat.BigTextStyle().bigText(details))
                 .setPriority(NotificationCompat.PRIORITY_HIGH)
+                .setCategory(NotificationCompat.CATEGORY_MESSAGE)
+                .setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
                 .setAutoCancel(true)
+                .setLocalOnly(false)
                 .setContentIntent(getHistoryActivityPendingIntent())
                 .build();
 
         NotificationManager manager = getSystemService(NotificationManager.class);
-        int notificationId = TX_NOTIFICATION_BASE_ID + (int) tx.blockHeight;
+        int notificationId = TX_NOTIFICATION_BASE_ID + (int) (tx.blockHeight % 100_000);
         manager.notify(notificationId, notification);
     }
 
     private PendingIntent getMainActivityPendingIntent() {
         Intent intent = new Intent(this, MainActivity.class);
         return PendingIntent.getActivity(
-                this, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE);
+                this, 0, intent,
+                PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE);
     }
 
     private PendingIntent getHistoryActivityPendingIntent() {
@@ -154,50 +165,58 @@ public class BackgroundSyncService extends Service {
                 .addNextIntent(historyIntent)
                 .getPendingIntent(
                         1,
-                        PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE
-                );
+                        PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE);
     }
 
     private void createNotificationChannels() {
         NotificationChannel syncChannel = new NotificationChannel(
                 CHANNEL_ID,
-                "Automatic synchronization",
-                NotificationManager.IMPORTANCE_LOW
+                getString(R.string.channel_sync_name),
+                NotificationManager.IMPORTANCE_MIN
         );
-        syncChannel.setDescription("Keeps balance and history up to date");
+        syncChannel.setDescription(getString(R.string.channel_sync_desc));
+        syncChannel.setShowBadge(false);
+        syncChannel.enableVibration(false);
+        syncChannel.setSound(null, null);
 
         NotificationChannel txChannel = new NotificationChannel(
                 CHANNEL_ID_TX,
-                "Incoming transactions",
+                getString(R.string.channel_tx_name),
                 NotificationManager.IMPORTANCE_HIGH
         );
-        txChannel.setDescription("Notifications for received BRC");
+        txChannel.setDescription(getString(R.string.channel_tx_desc));
+        txChannel.enableVibration(true);
 
         NotificationManager manager = getSystemService(NotificationManager.class);
         manager.createNotificationChannel(syncChannel);
         manager.createNotificationChannel(txChannel);
     }
 
-    private Notification buildNotification(String text) {
+    private Notification buildSyncNotification(String text) {
         return new NotificationCompat.Builder(this, CHANNEL_ID)
                 .setSmallIcon(R.mipmap.ic_launcher_round_monochrome)
-                .setContentTitle("BRC Wallet")
+                .setContentTitle(getString(R.string.notification_sync_title))
                 .setContentText(text)
                 .setContentIntent(getMainActivityPendingIntent())
                 .setOngoing(true)
                 .setOnlyAlertOnce(true)
+                .setSilent(true)
+                .setLocalOnly(true)
+                .setPriority(NotificationCompat.PRIORITY_MIN)
                 .build();
     }
 
-    private void updateNotification(String text) {
+    private void updateSyncNotification(String text) {
         NotificationManager manager = getSystemService(NotificationManager.class);
-        manager.notify(NOTIFICATION_ID, buildNotification(text));
+        manager.notify(NOTIFICATION_ID, buildSyncNotification(text));
     }
 
     @Override
     public void onDestroy() {
         super.onDestroy();
-        handler.removeCallbacksAndMessages(null);
+        if (handler != null) {
+            handler.removeCallbacksAndMessages(null);
+        }
     }
 
     @Override
