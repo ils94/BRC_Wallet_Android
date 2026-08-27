@@ -24,7 +24,7 @@
     <string name="menu_export">Privaten Schlüssel exportieren</string>
     <string name="menu_settings">Einstellungen</string>
     <string name="menu_server">Server</string>
-    <string name="menu_sync_height">Synchronisationshöhe</string>
+    <string name="menu_sync_height">Synchronisierungsoptionen</string>
 
     <string name="dialog_new_wallet_title">Neue Brieftasche erstellen?</string>
     <string name="dialog_new_wallet_message">Dies löscht die aktuelle Brieftasche. Exportieren Sie zuerst den privaten Schlüssel, falls Guthaben vorhanden ist.</string>
@@ -79,12 +79,16 @@
     <string name="status_tx_rejected">Abgelehnt: %1$s</string>
     <string name="status_send_error">Fehler beim Senden: %1$s</string>
 
-    <string name="dialog_set_height_title">Synchronisationshöhe setzen</string>
-    <string name="dialog_set_height_message">Warnung: Das Setzen einer anderen Höhe setzt Guthaben und Nonce zurück, und die Synchronisation beginnt ab diesem Block. Nur verwenden, wenn sicher ist, dass die Brieftasche keine Transaktionen vor dieser Höhe hat.</string>
-    <string name="hint_block_height">Blockhöhe (z. B. 50000)</string>
-    <string name="button_set">Setzen</string>
-    <string name="toast_height_set">Höhe auf %1$d gesetzt. Synchronisation wird neu gestartet.</string>
-    <string name="toast_invalid_height">Ungültige Höhe.</string>
+    <string name="dialog_set_height_title">Synchronisierungsoptionen</string>
+    <string name="dialog_set_height_message">Wählen Sie aus, wie die Wallet ihren Verlauf synchronisieren soll.</string>
+    <string name="sync_option_full">Vollständige Synchronisierung</string>
+    <string name="sync_option_blocks">Zahlungen nach Blöcken abrufen</string>
+    <string name="sync_option_full_description">Durchsucht die gesamte Blockchain-Historie nach Transaktionen.</string>
+    <string name="sync_option_blocks_description">Ruft Zahlungsdaten ab einer bestimmten Blockhöhe ab.</string>
+    <string name="hint_block_height">Start-Blockhöhe (z. B. 50000)</string>
+    <string name="button_set">Starten</string>
+    <string name="toast_height_set">Synchronisierung ab Block %1$d wird gestartet.</string>
+    <string name="toast_invalid_height">Ungültige Blockhöhe.</string>
 
     <string name="history_empty">Noch keine Transaktionen aufgezeichnet.</string>
     <string name="history_title">Transaktionsverlauf</string>
@@ -206,4 +210,13 @@
     <string name="notification_sync_title">BRC Wallet</string>
     <string name="notification_sync_active">Automatische Synchronisierung aktiv</string>
     <string name="notification_syncing">Synchronisierung…</string>
+
+    <string name="radio_full_sync">Vollständige Synchronisierung</string>
+    <string name="radio_search_payments">Nach fehlenden Zahlungen suchen</string>
+    <string name="status_rescanning_history">Suche nach fehlenden Zahlungen…</string>
+    <string name="status_rescanning_history_progress">Suche in Block %1$d von %2$d…</string>
+    <string name="toast_history_rescan_complete">Zahlungssuche abgeschlossen.</string>
+    <string name="toast_history_rescan_failed">Suche nach fehlenden Zahlungen fehlgeschlagen.</string>
+
+    <string name="status_ready">Bereit</string>
 </resources>

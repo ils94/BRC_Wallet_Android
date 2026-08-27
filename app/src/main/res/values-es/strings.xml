@@ -24,7 +24,7 @@
     <string name="menu_export">Exportar clave privada</string>
     <string name="menu_settings">Configuración</string>
     <string name="menu_server">Servidor</string>
-    <string name="menu_sync_height">Altura de sincronización</string>
+    <string name="menu_sync_height">Opciones de sincronización</string>
 
     <string name="dialog_new_wallet_title">¿Crear nueva cartera?</string>
     <string name="dialog_new_wallet_message">Esto borrará la cartera actual. Exporte la clave privada antes si tiene saldo.</string>
@@ -79,12 +79,16 @@
     <string name="status_tx_rejected">Rechazada: %1$s</string>
     <string name="status_send_error">Error al enviar: %1$s</string>
 
-    <string name="dialog_set_height_title">Establecer altura de sincronización</string>
-    <string name="dialog_set_height_message">Advertencia: establecer una altura diferente restablecerá el saldo y el nonce, y la sincronización comenzará desde ese bloque. Úselo solo si está seguro de que su cartera no tiene transacciones antes de esa altura.</string>
-    <string name="hint_block_height">Altura del bloque (ej. 50000)</string>
-    <string name="button_set">Establecer</string>
-    <string name="toast_height_set">Altura establecida en %1$d. Se reiniciará la sincronización.</string>
-    <string name="toast_invalid_height">Altura inválida.</string>
+    <string name="dialog_set_height_title">Opciones de sincronización</string>
+    <string name="dialog_set_height_message">Elige cómo debe sincronizar la cartera su historial.</string>
+    <string name="sync_option_full">Sincronización completa</string>
+    <string name="sync_option_blocks">Buscar pagos por bloques</string>
+    <string name="sync_option_full_description">Analiza todo el historial de la blockchain en busca de transacciones.</string>
+    <string name="sync_option_blocks_description">Obtiene los datos de pagos a partir de una altura de bloque específica.</string>
+    <string name="hint_block_height">Altura inicial del bloque (p. ej., 50000)</string>
+    <string name="button_set">Iniciar</string>
+    <string name="toast_height_set">Iniciando la sincronización desde el bloque %1$d.</string>
+    <string name="toast_invalid_height">Altura de bloque no válida.</string>
 
     <string name="history_empty">Aún no hay transacciones registradas.</string>
     <string name="history_title">Historial de transacciones</string>
@@ -206,4 +210,13 @@
     <string name="notification_sync_title">BRC Wallet</string>
     <string name="notification_sync_active">Sincronización automática activa</string>
     <string name="notification_syncing">Sincronizando…</string>
+
+    <string name="radio_full_sync">Sincronización completa</string>
+    <string name="radio_search_payments">Buscar pagos faltantes</string>
+    <string name="status_rescanning_history">Buscando pagos faltantes…</string>
+    <string name="status_rescanning_history_progress">Buscando en el bloque %1$d de %2$d…</string>
+    <string name="toast_history_rescan_complete">Búsqueda de pagos completada.</string>
+    <string name="toast_history_rescan_failed">No se pudieron buscar los pagos faltantes.</string>
+
+    <string name="status_ready">Listo</string>
 </resources>

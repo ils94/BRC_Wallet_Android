@@ -188,6 +188,65 @@ public class MainActivity extends AppCompatActivity implements DialogManager.Wal
     }
 
     @Override
+    public void onHistoryRescanRequested(long height) {
+        startHistoryRescan(height);
+    }
+
+    private void startHistoryRescan(long fromHeight) {
+        if (!store.hasWallet()) {
+            toast(getString(R.string.toast_no_wallet));
+            return;
+        }
+
+        byte[] ourAddr = store.loadPublicKey();
+
+        if (ourAddr == null) {
+            toast(getString(R.string.toast_no_wallet));
+            return;
+        }
+
+        setStatus(getString(R.string.status_rescanning_history));
+
+        new Thread(() -> {
+            HistoryDatabase historyDatabase =
+                    new HistoryDatabase(getApplicationContext());
+
+            try {
+                ChainSync.rescanHistory(
+                        api,
+                        ourAddr,
+                        fromHeight,
+                        (height, tip) -> runOnUiThread(() ->
+                                setStatus(getString(
+                                        R.string.status_rescanning_history_progress,
+                                        height,
+                                        tip
+                                ))
+                        ),
+                        historyDatabase
+                );
+
+                runOnUiThread(() -> {
+                    toast(getString(
+                            R.string.toast_history_rescan_complete
+                    ));
+                    setStatus(getString(R.string.status_ready));
+                });
+
+            } catch (Exception e) {
+                runOnUiThread(() -> {
+                    toast(getString(
+                            R.string.toast_history_rescan_failed
+                    ));
+                    setStatus(getString(R.string.status_ready));
+                });
+            } finally {
+                historyDatabase.close();
+            }
+        }).start();
+    }
+
+    @Override
     public void onSendRequested(byte[] to, long amountWei, long feeWei, String password) {
         setStatus(getString(R.string.status_sending));
         operations.sendTransaction(to, amountWei, feeWei, password, (success, message) -> {

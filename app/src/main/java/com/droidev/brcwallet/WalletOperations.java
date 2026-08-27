@@ -47,6 +47,7 @@ public class WalletOperations {
             postCompletion(doneCallback, false, context.getString(R.string.toast_no_wallet));
             return;
         }
+
         byte[] pub = store.loadPublicKey();
         if (pub == null) {
             postCompletion(doneCallback, false, context.getString(R.string.toast_no_wallet));
@@ -62,29 +63,88 @@ public class WalletOperations {
 
         io.execute(() -> {
             List<TxRecord> history = new ArrayList<>();
+            List<TxRecord> newHistory = new ArrayList<>();
 
             try {
                 postProgress(progressCallback, context.getString(R.string.status_syncing));
 
-                ChainSync.sync(api, pub, state,
-                        (h, tip) -> postProgress(progressCallback,
-                                context.getString(R.string.status_sync_progress, h, tip)),
-                        history);
+                try (HistoryDatabase historyDatabase = new HistoryDatabase(context.getApplicationContext())) {
+                    List<TxRecord> existingHistory = historyDatabase.loadAll();
 
-                store.saveHistory(history);
-                store.saveSyncState(state.height, state.balanceWei, state.nonce);
+                    java.util.HashSet<String> existingKeys =
+                            new java.util.HashSet<>();
 
-                if (historyCallback != null) {
-                    mainHandler.post(() -> historyCallback.onNewHistory(history, firstSync));
+                    for (TxRecord tx : existingHistory) {
+                        existingKeys.add(HistoryDatabase.dedupKey(tx));
+                    }
+
+                    ChainSync.sync(
+                            api,
+                            pub,
+                            state,
+                            (h, tip) -> postProgress(
+                                    progressCallback,
+                                    context.getString(
+                                            R.string.status_sync_progress,
+                                            h,
+                                            tip
+                                    )
+                            ),
+                            history
+                    );
+
+                    for (TxRecord tx : history) {
+                        String key = HistoryDatabase.dedupKey(tx);
+
+                        if (!existingKeys.contains(key)) {
+                            newHistory.add(tx);
+                            existingKeys.add(key);
+                        }
+                    }
+
                 }
 
-                postCompletion(doneCallback, true,
-                        context.getString(R.string.status_synced_to, state.height));
+                store.saveHistory(history);
+                store.saveSyncState(
+                        state.height,
+                        state.balanceWei,
+                        state.nonce
+                );
+
+                if (historyCallback != null) {
+                    mainHandler.post(() ->
+                            historyCallback.onNewHistory(
+                                    newHistory,
+                                    firstSync
+                            )
+                    );
+                }
+
+                postCompletion(
+                        doneCallback,
+                        true,
+                        context.getString(
+                                R.string.status_synced_to,
+                                state.height
+                        )
+                );
+
             } catch (Exception e) {
                 store.saveHistory(history);
-                store.saveSyncState(state.height, state.balanceWei, state.nonce);
-                postCompletion(doneCallback, false,
-                        context.getString(R.string.status_sync_error, e.getMessage()));
+                store.saveSyncState(
+                        state.height,
+                        state.balanceWei,
+                        state.nonce
+                );
+
+                postCompletion(
+                        doneCallback,
+                        false,
+                        context.getString(
+                                R.string.status_sync_error,
+                                e.getMessage()
+                        )
+                );
             }
         });
     }

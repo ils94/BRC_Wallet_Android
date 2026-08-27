@@ -24,7 +24,7 @@
     <string name="menu_export">Export private key</string>
     <string name="menu_settings">Settings</string>
     <string name="menu_server">Server</string>
-    <string name="menu_sync_height">Sync height</string>
+    <string name="menu_sync_height">Synchronization options</string>
 
     <string name="dialog_new_wallet_title">Create new wallet?</string>
     <string name="dialog_new_wallet_message">This will erase the current wallet. Export the private key first if it has balance.</string>
@@ -79,12 +79,16 @@
     <string name="status_tx_rejected">Rejected: %1$s</string>
     <string name="status_send_error">Error sending: %1$s</string>
 
-    <string name="dialog_set_height_title">Set sync height</string>
-    <string name="dialog_set_height_message">Warning: setting a different height will reset balance and nonce, and synchronization will restart from that block. Use only if you are sure your wallet has no transactions before that height.</string>
-    <string name="hint_block_height">Block height (e.g. 50000)</string>
-    <string name="button_set">Set</string>
-    <string name="toast_height_set">Height set to %1$d. Synchronization will restart.</string>
-    <string name="toast_invalid_height">Invalid height.</string>
+    <string name="dialog_set_height_title">Synchronization options</string>
+    <string name="dialog_set_height_message">Choose how the wallet should synchronize its history.</string>
+    <string name="sync_option_full">Full synchronization</string>
+    <string name="sync_option_blocks">Fetch payments by blocks</string>
+    <string name="sync_option_full_description">Scan the entire blockchain history for transactions.</string>
+    <string name="sync_option_blocks_description">Fetch payment data starting from a specific block height.</string>
+    <string name="hint_block_height">Starting block height (e.g. 50000)</string>
+    <string name="button_set">Start</string>
+    <string name="toast_height_set">Starting synchronization from block %1$d.</string>
+    <string name="toast_invalid_height">Invalid block height.</string>
 
     <string name="history_empty">No transactions recorded yet.</string>
     <string name="history_title">Transaction history</string>
@@ -206,4 +210,13 @@
     <string name="notification_sync_title">BRC Wallet</string>
     <string name="notification_sync_active">Automatic synchronization active</string>
     <string name="notification_syncing">Synchronizing…</string>
+
+    <string name="radio_full_sync">Full synchronization</string>
+    <string name="radio_search_payments">Search for missing payments</string>
+    <string name="status_rescanning_history">Searching for missing payments…</string>
+    <string name="status_rescanning_history_progress">Searching block %1$d of %2$d…</string>
+    <string name="toast_history_rescan_complete">Payment search completed.</string>
+    <string name="toast_history_rescan_failed">Failed to search for missing payments.</string>
+
+    <string name="status_ready">Ready</string>
 </resources>

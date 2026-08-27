@@ -24,7 +24,7 @@
     <string name="menu_export">Exporter la clé privée</string>
     <string name="menu_settings">Paramètres</string>
     <string name="menu_server">Serveur</string>
-    <string name="menu_sync_height">Hauteur de synchronisation</string>
+    <string name="menu_sync_height">Options de synchronisation</string>
 
     <string name="dialog_new_wallet_title">Créer un nouveau portefeuille ?</string>
     <string name="dialog_new_wallet_message">Cela effacera le portefeuille actuel. Exportez d\'abord la clé privée s\'il contient un solde.</string>
@@ -79,12 +79,16 @@
     <string name="status_tx_rejected">Rejetée : %1$s</string>
     <string name="status_send_error">Erreur d\'envoi : %1$s</string>
 
-    <string name="dialog_set_height_title">Définir la hauteur de synchronisation</string>
-    <string name="dialog_set_height_message">Attention : définir une hauteur différente réinitialisera le solde et le nonce, et la synchronisation repartira de ce bloc. Utilisez uniquement si vous êtes sûr que votre portefeuille n\'a pas de transactions avant cette hauteur.</string>
-    <string name="hint_block_height">Hauteur du bloc (ex. 50000)</string>
-    <string name="button_set">Définir</string>
-    <string name="toast_height_set">Hauteur définie à %1$d. La synchronisation redémarrera.</string>
-    <string name="toast_invalid_height">Hauteur invalide.</string>
+    <string name="dialog_set_height_title">Options de synchronisation</string>
+    <string name="dialog_set_height_message">Choisissez comment le portefeuille doit synchroniser son historique.</string>
+    <string name="sync_option_full">Synchronisation complète</string>
+    <string name="sync_option_blocks">Récupérer les paiements par blocs</string>
+    <string name="sync_option_full_description">Analyse tout l’historique de la blockchain à la recherche de transactions.</string>
+    <string name="sync_option_blocks_description">Récupère les données de paiement à partir d’une hauteur de bloc spécifique.</string>
+    <string name="hint_block_height">Hauteur de bloc de départ (ex. 50000)</string>
+    <string name="button_set">Démarrer</string>
+    <string name="toast_height_set">Démarrage de la synchronisation à partir du bloc %1$d.</string>
+    <string name="toast_invalid_height">Hauteur de bloc invalide.</string>
 
     <string name="history_empty">Aucune transaction enregistrée pour l\'instant.</string>
     <string name="history_title">Historique des transactions</string>
@@ -206,4 +210,13 @@
     <string name="notification_sync_title">BRC Wallet</string>
     <string name="notification_sync_active">Synchronisation automatique active</string>
     <string name="notification_syncing">Synchronisation…</string>
+
+    <string name="radio_full_sync">Synchronisation complète</string>
+    <string name="radio_search_payments">Rechercher les paiements manquants</string>
+    <string name="status_rescanning_history">Recherche des paiements manquants…</string>
+    <string name="status_rescanning_history_progress">Recherche dans le bloc %1$d sur %2$d…</string>
+    <string name="toast_history_rescan_complete">Recherche des paiements terminée.</string>
+    <string name="toast_history_rescan_failed">Échec de la recherche des paiements manquants.</string>
+
+    <string name="status_ready">Prêt</string>
 </resources>

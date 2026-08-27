@@ -131,6 +131,11 @@ public class ContactsActivity extends AppCompatActivity
             @Override public void onHeightSet(long height) {}
 
             @Override
+            public void onHistoryRescanRequested(long height) {
+
+            }
+
+            @Override
             public void onSendRequested(byte[] to, long amountWei, long feeWei, String password) {
                 operations.sendTransaction(to, amountWei, feeWei, password, (success, message) -> Toast.makeText(ContactsActivity.this, message, Toast.LENGTH_LONG).show());
             }

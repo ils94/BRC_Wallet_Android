@@ -23,11 +23,37 @@
         android:textColor="#A7ADB5"
         android:textSize="14sp" />
 
+    <RadioGroup
+        android:id="@+id/radioSyncMode"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="16dp">
+
+        <androidx.appcompat.widget.AppCompatRadioButton
+            android:id="@+id/radioFullSync"
+            android:layout_width="match_parent"
+            android:layout_height="48dp"
+            android:buttonTint="@color/radio_button_tint"
+            android:text="@string/radio_full_sync"
+            android:textColor="#F5F5F5"
+            android:textSize="14sp" />
+
+        <androidx.appcompat.widget.AppCompatRadioButton
+            android:id="@+id/radioSearchPayments"
+            android:layout_width="match_parent"
+            android:layout_height="48dp"
+            android:buttonTint="@color/radio_button_tint"
+            android:text="@string/radio_search_payments"
+            android:textColor="#F5F5F5"
+            android:textSize="14sp" />
+
+    </RadioGroup>
+
     <EditText
         android:id="@+id/edtHeight"
         android:layout_width="match_parent"
         android:layout_height="52dp"
-        android:layout_marginTop="20dp"
+        android:layout_marginTop="12dp"
         android:background="@drawable/bg_input"
         android:hint="@string/hint_block_height"
         android:inputType="number"

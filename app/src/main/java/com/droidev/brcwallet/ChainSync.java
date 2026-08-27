@@ -3,6 +3,7 @@ package com.droidev.brcwallet;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
@@ -28,18 +29,40 @@ public final class ChainSync {
         public long nonce = 0;
     }
 
-    public static void sync(BRCApi api, byte[] ourAddr, AccountState state,
-                            Progress progress, List<TxRecord> history) throws IOException {
+    public static void sync(
+            BRCApi api,
+            byte[] ourAddr,
+            AccountState state,
+            Progress progress,
+            List<TxRecord> history
+    ) throws IOException {
+
         BRCApi.Tip tip = api.getTip();
         long from = state.height + 1;
 
         while (from <= tip.height) {
             List<byte[]> blocks = fetchBlocksWithRetry(api, from);
 
-            if (blocks.isEmpty()) break;
+            if (blocks.isEmpty()) {
+                break;
+            }
+
+            long expectedHeight = from;
 
             for (byte[] block : blocks) {
+                long blockHeight = getBlockHeight(block);
+
+                if (blockHeight != expectedHeight) {
+                    throw new IOException(
+                            "Unexpected block height. Expected " +
+                                    expectedHeight +
+                                    " but received " +
+                                    blockHeight
+                    );
+                }
+
                 applyBlock(block, ourAddr, state, history);
+                expectedHeight++;
             }
 
             from = state.height + 1;
@@ -52,15 +75,79 @@ public final class ChainSync {
         }
     }
 
-    private static List<byte[]> fetchBlocksWithRetry(BRCApi api, long from)
-            throws IOException {
+    public static void rescanHistory(
+            BRCApi api,
+            byte[] ourAddr,
+            long fromHeight,
+            Progress progress,
+            HistoryDatabase historyDatabase
+    ) throws IOException {
+
+        if (fromHeight < 0) {
+            throw new IllegalArgumentException("Invalid starting height");
+        }
+
+        BRCApi.Tip tip = api.getTip();
+
+        if (fromHeight > tip.height) {
+            return;
+        }
+
+        long from = fromHeight;
+
+        while (from <= tip.height) {
+            List<byte[]> blocks = fetchBlocksWithRetry(api, from);
+
+            if (blocks.isEmpty()) {
+                break;
+            }
+
+            long expectedHeight = from;
+            List<TxRecord> recovered = new ArrayList<>();
+
+            for (byte[] block : blocks) {
+                long blockHeight = getBlockHeight(block);
+
+                if (blockHeight != expectedHeight) {
+                    throw new IOException(
+                            "Unexpected block height. Expected " +
+                                    expectedHeight +
+                                    " but received " +
+                                    blockHeight
+                    );
+                }
+
+                extractHistory(block, ourAddr, recovered);
+                expectedHeight++;
+            }
+
+            if (!recovered.isEmpty()) {
+                historyDatabase.insertAll(recovered);
+            }
+
+            from = expectedHeight;
+
+            if (progress != null) {
+                progress.onProgress(from - 1, tip.height);
+            }
+
+            sleep(REQUEST_INTERVAL_MS);
+        }
+    }
+
+    private static List<byte[]> fetchBlocksWithRetry(
+            BRCApi api,
+            long from
+    ) throws IOException {
+
         int attempt = 0;
 
         while (true) {
             try {
-                return api.getBlocks(from, ChainSync.PAGE);
+                return api.getBlocks(from, PAGE);
             } catch (IOException e) {
                 attempt++;
+
                 if (attempt > MAX_RETRIES) {
                     throw e;
                 }
@@ -71,17 +158,17 @@ public final class ChainSync {
         }
     }
 
-    private static void sleep(long ms) throws IOException {
-        try {
-            Thread.sleep(ms);
-        } catch (InterruptedException e) {
-            Thread.currentThread().interrupt();
-            throw new IOException(e);
-        }
-    }
+    static void applyBlock(
+            byte[] block,
+            byte[] ourAddr,
+            AccountState s,
+            List<TxRecord> history
+    ) {
 
-    static void applyBlock(byte[] block, byte[] ourAddr, AccountState s, List<TxRecord> history) {
-        if (block.length < 152) throw new IllegalArgumentException("truncated block");
+        if (block.length < 152) {
+            throw new IllegalArgumentException("truncated block");
+        }
+
         ByteBuffer h = ByteBuffer.wrap(block).order(ByteOrder.BIG_ENDIAN);
 
         long height = h.getInt(0) & 0xFFFFFFFFL;
@@ -93,17 +180,23 @@ public final class ChainSync {
 
         long blockFees = 0;
         int off = 148;
+
         long txCount = u32(block, off);
         off += 4;
 
         for (long i = 0; i < txCount; i++) {
+
             int tag = (int) u32(block, off);
+
             if (tag == TxBuilder.CHAIN_ID) {
+
                 byte[] from = Arrays.copyOfRange(block, off + 4, off + 36);
                 byte[] to = Arrays.copyOfRange(block, off + 36, off + 68);
+
                 long amount = i64(block, off + 68);
                 long fee = i64(block, off + 76);
                 long nonce = u32(block, off + 84);
+
                 blockFees += fee;
 
                 byte[] txBytes = Arrays.copyOfRange(block, off, off + 152);
@@ -113,50 +206,93 @@ public final class ChainSync {
                 boolean isToUs = Arrays.equals(to, ourAddr);
 
                 if (isFromUs) {
-                    s.balanceWei -= (amount + fee);
+                    s.balanceWei -= amount + fee;
                     s.nonce = nonce + 1;
+
                     if (history != null) {
-                        history.add(new TxRecord(TxRecord.Type.SEND, height, timestamp, txid,
-                                TxBuilder.toHex(from), TxBuilder.toHex(to), amount, fee, nonce));
+                        history.add(new TxRecord(
+                                TxRecord.Type.SEND,
+                                height,
+                                timestamp,
+                                txid,
+                                TxBuilder.toHex(from),
+                                TxBuilder.toHex(to),
+                                amount,
+                                fee,
+                                nonce
+                        ));
                     }
                 }
+
                 if (isToUs && !isFromUs) {
                     s.balanceWei += amount;
+
                     if (history != null) {
-                        history.add(new TxRecord(TxRecord.Type.RECEIVE, height, timestamp, txid,
-                                TxBuilder.toHex(from), TxBuilder.toHex(to), amount, fee, nonce));
+                        history.add(new TxRecord(
+                                TxRecord.Type.RECEIVE,
+                                height,
+                                timestamp,
+                                txid,
+                                TxBuilder.toHex(from),
+                                TxBuilder.toHex(to),
+                                amount,
+                                fee,
+                                nonce
+                        ));
                     }
                 }
+
                 off += 152;
+
             } else if (tag == TAG_LOCK) {
+
                 byte[] from = Arrays.copyOfRange(block, off + 8, off + 40);
+
                 long amount = i64(block, off + 40);
                 long fee = i64(block, off + 48);
                 long nonce = u32(block, off + 56);
+
                 blockFees += fee;
 
                 byte[] txBytes = Arrays.copyOfRange(block, off, off + 156);
                 String txid = TxBuilder.sha256Hex(txBytes);
 
                 if (Arrays.equals(from, ourAddr)) {
-                    s.balanceWei -= (amount + fee);
+                    s.balanceWei -= amount + fee;
                     s.nonce = nonce + 1;
+
                     if (history != null) {
-                        history.add(new TxRecord(TxRecord.Type.LOCK, height, timestamp, txid,
-                                TxBuilder.toHex(from), "", amount, fee, nonce));
+                        history.add(new TxRecord(
+                                TxRecord.Type.LOCK,
+                                height,
+                                timestamp,
+                                txid,
+                                TxBuilder.toHex(from),
+                                "",
+                                amount,
+                                fee,
+                                nonce
+                        ));
                     }
                 }
+
                 off += 156;
+
             } else if (tag == TAG_REDEEM) {
+
                 byte[] to = Arrays.copyOfRange(block, off + 36, off + 68);
+
                 long amount = i64(block, off + 68);
                 long fee = i64(block, off + 76);
+
                 blockFees += fee;
 
                 int scriptLen = u16(block, off + 84);
                 int p = off + 86 + scriptLen;
+
                 int witnessCount = block[p] & 0xFF;
                 p++;
+
                 for (int w = 0; w < witnessCount; w++) {
                     int len = u16(block, p);
                     p += 2 + len;
@@ -166,27 +302,56 @@ public final class ChainSync {
                 String txid = TxBuilder.sha256Hex(txBytes);
 
                 if (Arrays.equals(to, ourAddr)) {
-                    s.balanceWei += (amount - fee);
+                    s.balanceWei += amount - fee;
+
                     if (history != null) {
-                        history.add(new TxRecord(TxRecord.Type.REDEEM, height, timestamp, txid,
-                                "", TxBuilder.toHex(to), amount, fee, 0));
+                        history.add(new TxRecord(
+                                TxRecord.Type.REDEEM,
+                                height,
+                                timestamp,
+                                txid,
+                                "",
+                                TxBuilder.toHex(to),
+                                amount,
+                                fee,
+                                0
+                        ));
                     }
                 }
+
                 off = p;
+
             } else {
                 throw new IllegalArgumentException(
-                        "Unknown tx tag 0x" + Integer.toHexString(tag) + " in block " + height);
+                        "Unknown tx tag 0x" +
+                                Integer.toHexString(tag) +
+                                " in block " +
+                                height
+                );
             }
         }
 
         if (height > 0) {
             long halvings = height / HALVING_INTERVAL;
-            long subsidy = halvings >= 64 ? 0 : INITIAL_REWARD >> halvings;
+            long subsidy = halvings >= 64
+                    ? 0
+                    : INITIAL_REWARD >> halvings;
+
             if (Arrays.equals(miner, ourAddr)) {
                 s.balanceWei += subsidy + blockFees;
+
                 if (history != null) {
-                    history.add(new TxRecord(TxRecord.Type.MINE, height, timestamp, "",
-                            "", TxBuilder.toHex(miner), subsidy + blockFees, 0, 0));
+                    history.add(new TxRecord(
+                            TxRecord.Type.MINE,
+                            height,
+                            timestamp,
+                            "",
+                            "",
+                            TxBuilder.toHex(miner),
+                            subsidy + blockFees,
+                            0,
+                            0
+                    ));
                 }
             }
         }
@@ -194,15 +359,217 @@ public final class ChainSync {
         s.height = height;
     }
 
+    private static void extractHistory(
+            byte[] block,
+            byte[] ourAddr,
+            List<TxRecord> history
+    ) {
+
+        if (block.length < 152) {
+            throw new IllegalArgumentException("truncated block");
+        }
+
+        ByteBuffer h = ByteBuffer.wrap(block).order(ByteOrder.BIG_ENDIAN);
+
+        long height = h.getInt(0) & 0xFFFFFFFFL;
+        long timestamp = h.getLong(100);
+
+        byte[] miner = new byte[32];
+        h.position(116);
+        h.get(miner);
+
+        long blockFees = 0;
+        int off = 148;
+
+        long txCount = u32(block, off);
+        off += 4;
+
+        for (long i = 0; i < txCount; i++) {
+
+            int tag = (int) u32(block, off);
+
+            if (tag == TxBuilder.CHAIN_ID) {
+
+                byte[] from = Arrays.copyOfRange(block, off + 4, off + 36);
+                byte[] to = Arrays.copyOfRange(block, off + 36, off + 68);
+
+                long amount = i64(block, off + 68);
+                long fee = i64(block, off + 76);
+                long nonce = u32(block, off + 84);
+
+                blockFees += fee;
+
+                byte[] txBytes = Arrays.copyOfRange(block, off, off + 152);
+                String txid = TxBuilder.sha256Hex(txBytes);
+
+                boolean isFromUs = Arrays.equals(from, ourAddr);
+                boolean isToUs = Arrays.equals(to, ourAddr);
+
+                if (isFromUs && history != null) {
+                    history.add(new TxRecord(
+                            TxRecord.Type.SEND,
+                            height,
+                            timestamp,
+                            txid,
+                            TxBuilder.toHex(from),
+                            TxBuilder.toHex(to),
+                            amount,
+                            fee,
+                            nonce
+                    ));
+                }
+
+                if (isToUs && !isFromUs && history != null) {
+                    history.add(new TxRecord(
+                            TxRecord.Type.RECEIVE,
+                            height,
+                            timestamp,
+                            txid,
+                            TxBuilder.toHex(from),
+                            TxBuilder.toHex(to),
+                            amount,
+                            fee,
+                            nonce
+                    ));
+                }
+
+                off += 152;
+
+            } else if (tag == TAG_LOCK) {
+
+                byte[] from = Arrays.copyOfRange(block, off + 8, off + 40);
+
+                long amount = i64(block, off + 40);
+                long fee = i64(block, off + 48);
+                long nonce = u32(block, off + 56);
+
+                blockFees += fee;
+
+                byte[] txBytes = Arrays.copyOfRange(block, off, off + 156);
+                String txid = TxBuilder.sha256Hex(txBytes);
+
+                if (Arrays.equals(from, ourAddr) && history != null) {
+                    history.add(new TxRecord(
+                            TxRecord.Type.LOCK,
+                            height,
+                            timestamp,
+                            txid,
+                            TxBuilder.toHex(from),
+                            "",
+                            amount,
+                            fee,
+                            nonce
+                    ));
+                }
+
+                off += 156;
+
+            } else if (tag == TAG_REDEEM) {
+
+                byte[] to = Arrays.copyOfRange(block, off + 36, off + 68);
+
+                long amount = i64(block, off + 68);
+                long fee = i64(block, off + 76);
+
+                blockFees += fee;
+
+                int scriptLen = u16(block, off + 84);
+                int p = off + 86 + scriptLen;
+
+                int witnessCount = block[p] & 0xFF;
+                p++;
+
+                for (int w = 0; w < witnessCount; w++) {
+                    int len = u16(block, p);
+                    p += 2 + len;
+                }
+
+                byte[] txBytes = Arrays.copyOfRange(block, off, p);
+                String txid = TxBuilder.sha256Hex(txBytes);
+
+                if (Arrays.equals(to, ourAddr) && history != null) {
+                    history.add(new TxRecord(
+                            TxRecord.Type.REDEEM,
+                            height,
+                            timestamp,
+                            txid,
+                            "",
+                            TxBuilder.toHex(to),
+                            amount,
+                            fee,
+                            0
+                    ));
+                }
+
+                off = p;
+
+            } else {
+                throw new IllegalArgumentException(
+                        "Unknown tx tag 0x" +
+                                Integer.toHexString(tag) +
+                                " in block " +
+                                height
+                );
+            }
+        }
+
+        if (height > 0) {
+            long halvings = height / HALVING_INTERVAL;
+            long subsidy = halvings >= 64
+                    ? 0
+                    : INITIAL_REWARD >> halvings;
+
+            if (Arrays.equals(miner, ourAddr) && history != null) {
+                history.add(new TxRecord(
+                        TxRecord.Type.MINE,
+                        height,
+                        timestamp,
+                        "",
+                        "",
+                        TxBuilder.toHex(miner),
+                        subsidy + blockFees,
+                        0,
+                        0
+                ));
+            }
+        }
+    }
+
+    private static long getBlockHeight(byte[] block) {
+        if (block == null || block.length < 4) {
+            throw new IllegalArgumentException("truncated block");
+        }
+
+        return u32(block, 0);
+    }
+
+    private static void sleep(long ms) throws IOException {
+        try {
+            Thread.sleep(ms);
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+            throw new IOException(e);
+        }
+    }
+
     private static long u32(byte[] b, int off) {
-        return ((long) ByteBuffer.wrap(b, off, 4).order(ByteOrder.BIG_ENDIAN).getInt()) & 0xFFFFFFFFL;
+        return ((long) ByteBuffer
+                .wrap(b, off, 4)
+                .order(ByteOrder.BIG_ENDIAN)
+                .getInt()) & 0xFFFFFFFFL;
     }
 
     private static int u16(byte[] b, int off) {
-        return ByteBuffer.wrap(b, off, 2).order(ByteOrder.BIG_ENDIAN).getShort() & 0xFFFF;
+        return ByteBuffer
+                .wrap(b, off, 2)
+                .order(ByteOrder.BIG_ENDIAN)
+                .getShort() & 0xFFFF;
     }
 
     private static long i64(byte[] b, int off) {
-        return ByteBuffer.wrap(b, off, 8).order(ByteOrder.BIG_ENDIAN).getLong();
+        return ByteBuffer
+                .wrap(b, off, 8)
+                .order(ByteOrder.BIG_ENDIAN)
+                .getLong();
     }
 }

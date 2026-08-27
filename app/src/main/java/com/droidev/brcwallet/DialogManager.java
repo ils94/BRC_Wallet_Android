@@ -30,6 +30,8 @@ public class DialogManager {
 
         void onHeightSet(long height);
 
+        void onHistoryRescanRequested(long height);
+
         void onSendRequested(byte[] to, long amountWei, long feeWei, String password);
     }
 
@@ -484,26 +486,49 @@ public class DialogManager {
 
     public void showSetHeightDialog() {
         @SuppressLint("InflateParams")
-        View view = LayoutInflater.from(context).inflate(R.layout.dialog_set_height, null);
+        View view = LayoutInflater.from(context)
+                .inflate(R.layout.dialog_set_height, null);
+
         EditText edtHeight = view.findViewById(R.id.edtHeight);
         Button btnSet = view.findViewById(R.id.btnSet);
         TextView btnCancel = view.findViewById(R.id.btnCancel);
 
+        androidx.appcompat.widget.AppCompatRadioButton radioFullSync =
+                view.findViewById(R.id.radioFullSync);
+
+        androidx.appcompat.widget.AppCompatRadioButton radioSearchPayments =
+                view.findViewById(R.id.radioSearchPayments);
+
+        radioFullSync.setChecked(true);
+
         Dialog dialog = createStyledDialog(view);
 
         btnSet.setOnClickListener(v -> {
+            String text = edtHeight.getText().toString().trim();
+
             try {
-                long height = Long.parseLong(edtHeight.getText().toString());
-                if (height < 0) throw new NumberFormatException();
-                store.setSyncHeight(height);
-                callback.onHeightSet(height);
+                long height = Long.parseLong(text);
+
+                if (height < 0) {
+                    throw new NumberFormatException();
+                }
+
+                if (radioFullSync.isChecked()) {
+                    store.setSyncHeight(height);
+                    callback.onHeightSet(height);
+                } else if (radioSearchPayments.isChecked()) {
+                    callback.onHistoryRescanRequested(height);
+                }
+
                 dialog.dismiss();
+
             } catch (NumberFormatException e) {
                 toast(context.getString(R.string.toast_invalid_height));
             }
         });
 
         btnCancel.setOnClickListener(v -> dialog.dismiss());
+
         dialog.show();
     }
 
