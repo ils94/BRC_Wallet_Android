@@ -22,10 +22,26 @@ public final class TxBuilder {
     private TxBuilder() {
     }
 
-    public static KeyPair generateKeyPair() {
-        Ed25519PrivateKeyParameters priv = new Ed25519PrivateKeyParameters(new SecureRandom());
-        Ed25519PublicKeyParameters pub = priv.generatePublicKey();
-        return new KeyPair(priv.getEncoded(), pub.getEncoded());
+    public static KeyPair generateKeyPair(byte[] extraEntropy) {
+        try {
+            SecureRandom sr = new SecureRandom();
+            byte[] sys = new byte[32];
+            sr.nextBytes(sys);
+
+            MessageDigest md = MessageDigest.getInstance("SHA-256");
+            md.update(sys);
+            if (extraEntropy != null && extraEntropy.length > 0) {
+                md.update(extraEntropy);
+            }
+            md.update(ByteBuffer.allocate(8).putLong(System.nanoTime()).array());
+            byte[] seed = md.digest();
+
+            Ed25519PrivateKeyParameters priv = new Ed25519PrivateKeyParameters(seed);
+            Ed25519PublicKeyParameters pub = priv.generatePublicKey();
+            return new KeyPair(priv.getEncoded(), pub.getEncoded());
+        } catch (NoSuchAlgorithmException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     public static byte[] publicKeyFromPrivate(byte[] privKey) {

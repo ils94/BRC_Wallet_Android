@@ -11,6 +11,7 @@ import android.content.pm.ServiceInfo;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.Looper;
+import android.os.SystemClock;
 
 import androidx.core.app.NotificationCompat;
 
@@ -26,6 +27,9 @@ public class BackgroundSyncService extends Service {
     private static final long SYNC_INTERVAL_MS = 60_000;
     private static final long RETRY_DELAY_MS = 5_000;
     private static final long TX_NOTIFY_DELAY_MS = 800;
+
+    private long lastProgressNotifyMs = 0;
+    private static final long PROGRESS_THROTTLE_MS = 500;
 
     private Handler handler;
     private WalletOperations operations;
@@ -78,10 +82,17 @@ public class BackgroundSyncService extends Service {
 
         operations.refreshBalance(
                 progress -> {
+                    long now = SystemClock.uptimeMillis();
+                    if (now - lastProgressNotifyMs >= PROGRESS_THROTTLE_MS) {
+                        lastProgressNotifyMs = now;
+                        updateSyncNotification(progress);
+                    }
                 },
                 (success, message) -> {
                     isSyncing = false;
-                    updateSyncNotification(getString(R.string.notification_sync_active));
+                    updateSyncNotification(
+                            success ? message : getString(R.string.notification_sync_active)
+                    );
 
                     if (success) {
                         scheduleNextSync(SYNC_INTERVAL_MS);

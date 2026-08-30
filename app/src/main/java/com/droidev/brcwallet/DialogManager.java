@@ -10,6 +10,7 @@ import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
 import android.widget.Button;
+import android.widget.CheckBox;
 import android.widget.EditText;
 import android.widget.SeekBar;
 import android.widget.TextView;
@@ -47,6 +48,16 @@ public class DialogManager {
         void startScan(EditText targetField);
     }
 
+    public interface CameraEntropyCallback {
+        void requestCameraEntropy(CameraEntropyResult result);
+    }
+
+    public interface CameraEntropyResult {
+        void onEntropy(byte[] imageBytes);
+    }
+
+    private CameraEntropyCallback cameraEntropyCallback;
+
     private final Context context;
     private final WalletStore store;
     private final WalletActionCallback callback;
@@ -67,6 +78,10 @@ public class DialogManager {
 
     public void setScannerCallback(ScannerCallback callback) {
         this.scanCallback = callback;
+    }
+
+    public void setCameraEntropyCallback(CameraEntropyCallback cb) {
+        this.cameraEntropyCallback = cb;
     }
 
     public void showNewWalletDialog() {
@@ -120,6 +135,8 @@ public class DialogManager {
         View view = LayoutInflater.from(context).inflate(R.layout.dialog_create_wallet, null);
         EditText edtPassword = view.findViewById(R.id.edtPassword);
         EditText edtConfirm = view.findViewById(R.id.edtConfirm);
+        CheckBox chkSensor = view.findViewById(R.id.chkSensorEntropy);
+        CheckBox chkCamera = view.findViewById(R.id.chkCameraEntropy);
         Button btnCreate = view.findViewById(R.id.btnCreate);
         TextView btnCancel = view.findViewById(R.id.btnCancel);
 
@@ -138,16 +155,49 @@ public class DialogManager {
                 return;
             }
 
-            TxBuilder.KeyPair kp = TxBuilder.generateKeyPair();
-            store.clearHistory();
-            store.savePrivateKey(kp.privateKey, pwd);
-            store.saveSyncState(-1, 0, 0);
-            callback.onWalletCreated();
-            dialog.dismiss();
+            boolean useSensors = chkSensor.isChecked();
+            boolean useCamera = chkCamera.isChecked();
+
+            btnCreate.setEnabled(false);
+            toast(context.getString(R.string.status_collecting_entropy));
+
+            if (useCamera) {
+                if (cameraEntropyCallback == null) {
+                    toast(context.getString(R.string.toast_camera_unavailable));
+                    btnCreate.setEnabled(true);
+                    return;
+                }
+                dialog.dismiss();
+                cameraEntropyCallback.requestCameraEntropy(imageBytes ->
+                        finishWalletCreation(pwd, useSensors, imageBytes));
+            } else {
+                dialog.dismiss();
+                finishWalletCreation(pwd, useSensors, null);
+            }
         });
 
         btnCancel.setOnClickListener(v -> dialog.dismiss());
         dialog.show();
+    }
+
+    private void finishWalletCreation(String pwd, boolean useSensors, byte[] photoBytes) {
+        if (useSensors) {
+            EntropyCollector.collectSensors(context, 400, sensorHash -> {
+                byte[] extra = EntropyCollector.merge(sensorHash, photoBytes);
+                createWalletWithEntropy(pwd, extra);
+            });
+        } else {
+            byte[] extra = EntropyCollector.merge(photoBytes);
+            createWalletWithEntropy(pwd, extra);
+        }
+    }
+
+    private void createWalletWithEntropy(String pwd, byte[] extraEntropy) {
+        TxBuilder.KeyPair kp = TxBuilder.generateKeyPair(extraEntropy);
+        store.clearHistory();
+        store.savePrivateKey(kp.privateKey, pwd);
+        store.saveSyncState(-1, 0, 0);
+        callback.onWalletCreated();
     }
 
     public void showImportDialog() {

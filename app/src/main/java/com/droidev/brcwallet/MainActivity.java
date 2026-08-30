@@ -34,7 +34,10 @@ import com.google.zxing.qrcode.QRCodeWriter;
 import com.journeyapps.barcodescanner.ScanContract;
 import com.journeyapps.barcodescanner.ScanOptions;
 
-public class MainActivity extends AppCompatActivity implements DialogManager.WalletActionCallback, DialogManager.ScannerCallback {
+import java.io.ByteArrayOutputStream;
+
+public class MainActivity extends AppCompatActivity
+        implements DialogManager.WalletActionCallback, DialogManager.ScannerCallback {
 
     private WalletStore store;
     private BRCApi api;
@@ -46,12 +49,52 @@ public class MainActivity extends AppCompatActivity implements DialogManager.Wal
     private EditText tempEdtTo;
     private Handler uiHandler;
     private Runnable balanceUpdater;
+
+    private DialogManager.CameraEntropyResult pendingEntropyResult;
+
     private final ActivityResultLauncher<String> notificationPermissionLauncher =
             registerForActivityResult(new ActivityResultContracts.RequestPermission(), granted -> {
                 if (granted) {
                     startSyncService();
                 } else {
                     toast(getString(R.string.toast_notification_permission_denied));
+                }
+            });
+
+
+    private final ActivityResultLauncher<Void> takePicturePreview =
+            registerForActivityResult(new ActivityResultContracts.TakePicturePreview(), bitmap -> {
+                if (pendingEntropyResult == null) return;
+                DialogManager.CameraEntropyResult cb = pendingEntropyResult;
+                pendingEntropyResult = null;
+                if (bitmap == null) {
+                    cb.onEntropy(null);
+                    return;
+                }
+                ByteArrayOutputStream bos = new ByteArrayOutputStream();
+                bitmap.compress(Bitmap.CompressFormat.JPEG, 90, bos);
+                bitmap.recycle();
+                cb.onEntropy(bos.toByteArray());
+            });
+
+    private final ActivityResultLauncher<String> cameraPermissionLauncher =
+            registerForActivityResult(new ActivityResultContracts.RequestPermission(), granted -> {
+                if (granted) {
+                    takePicturePreview.launch(null);
+                } else {
+                    if (pendingEntropyResult != null) {
+                        pendingEntropyResult.onEntropy(null);
+                        pendingEntropyResult = null;
+                    }
+                    toast(getString(R.string.toast_camera_permission_denied));
+                }
+            });
+
+    private final ActivityResultLauncher<ScanOptions> scanLauncher =
+            registerForActivityResult(new ScanContract(), result -> {
+                if (result.getContents() != null && tempEdtTo != null) {
+                    tempEdtTo.setText(result.getContents());
+                    tempEdtTo = null;
                 }
             });
 
@@ -79,6 +122,10 @@ public class MainActivity extends AppCompatActivity implements DialogManager.Wal
         operations = new WalletOperations(this, store, api);
         dialogs = new DialogManager(this, store, this);
         dialogs.setScannerCallback(this);
+        dialogs.setCameraEntropyCallback(result -> {
+            pendingEntropyResult = result;
+            requestCameraAndCapture();
+        });
 
         txtAddress = findViewById(R.id.txtAddress);
         txtBalance = findViewById(R.id.txtBalance);
@@ -199,7 +246,6 @@ public class MainActivity extends AppCompatActivity implements DialogManager.Wal
         }
 
         byte[] ourAddr = store.loadPublicKey();
-
         if (ourAddr == null) {
             toast(getString(R.string.toast_no_wallet));
             return;
@@ -208,10 +254,8 @@ public class MainActivity extends AppCompatActivity implements DialogManager.Wal
         setStatus(getString(R.string.status_rescanning_history));
 
         new Thread(() -> {
-            HistoryDatabase historyDatabase =
-                    new HistoryDatabase(getApplicationContext());
 
-            try {
+            try (HistoryDatabase historyDatabase = new HistoryDatabase(getApplicationContext())) {
                 ChainSync.rescanHistory(
                         api,
                         ourAddr,
@@ -227,21 +271,15 @@ public class MainActivity extends AppCompatActivity implements DialogManager.Wal
                 );
 
                 runOnUiThread(() -> {
-                    toast(getString(
-                            R.string.toast_history_rescan_complete
-                    ));
+                    toast(getString(R.string.toast_history_rescan_complete));
                     setStatus(getString(R.string.status_ready));
                 });
 
             } catch (Exception e) {
                 runOnUiThread(() -> {
-                    toast(getString(
-                            R.string.toast_history_rescan_failed
-                    ));
+                    toast(getString(R.string.toast_history_rescan_failed));
                     setStatus(getString(R.string.status_ready));
                 });
-            } finally {
-                historyDatabase.close();
             }
         }).start();
     }
@@ -259,14 +297,6 @@ public class MainActivity extends AppCompatActivity implements DialogManager.Wal
             }
         });
     }
-
-    private final ActivityResultLauncher<ScanOptions> scanLauncher =
-            registerForActivityResult(new ScanContract(), result -> {
-                if (result.getContents() != null && tempEdtTo != null) {
-                    tempEdtTo.setText(result.getContents());
-                    tempEdtTo = null;
-                }
-            });
 
     @Override
     public void startScan(EditText targetField) {
@@ -410,5 +440,14 @@ public class MainActivity extends AppCompatActivity implements DialogManager.Wal
         Intent serviceIntent = new Intent(this, BackgroundSyncService.class);
         stopService(serviceIntent);
         toast(getString(R.string.toast_sync_stopped));
+    }
+
+    private void requestCameraAndCapture() {
+        if (checkSelfPermission(android.Manifest.permission.CAMERA)
+                == PackageManager.PERMISSION_GRANTED) {
+            takePicturePreview.launch(null);
+        } else {
+            cameraPermissionLauncher.launch(android.Manifest.permission.CAMERA);
+        }
     }
 }

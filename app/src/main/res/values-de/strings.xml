@@ -219,4 +219,10 @@
     <string name="toast_history_rescan_failed">Suche nach fehlenden Zahlungen fehlgeschlagen.</string>
 
     <string name="status_ready">Bereit</string>
+
+    <string name="create_wallet_sensor_entropy">Gerätesensoren als zusätzliche Entropie nutzen</string>
+    <string name="create_wallet_camera_entropy">Kamerafoto als zusätzliche Entropie nutzen</string>
+    <string name="toast_camera_unavailable">Kamera nicht verfügbar</string>
+    <string name="status_collecting_entropy">Entropie wird gesammelt…</string>
+    <string name="toast_camera_permission_denied">Kameraberechtigung verweigert</string>
 </resources>

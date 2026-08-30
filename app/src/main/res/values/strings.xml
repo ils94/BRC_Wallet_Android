@@ -219,4 +219,10 @@
     <string name="toast_history_rescan_failed">Failed to search for missing payments.</string>
 
     <string name="status_ready">Ready</string>
+
+    <string name="create_wallet_sensor_entropy">Use device sensors as extra entropy</string>
+    <string name="create_wallet_camera_entropy">Use camera photo as extra entropy</string>
+    <string name="toast_camera_unavailable">Camera not available</string>
+    <string name="status_collecting_entropy">Collecting entropy…</string>
+    <string name="toast_camera_permission_denied">Camera permission denied</string>
 </resources>

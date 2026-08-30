@@ -45,6 +45,25 @@
         android:textSize="14sp"
         tools:ignore="Autofill" />
 
+    <CheckBox
+        android:id="@+id/chkSensorEntropy"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="16dp"
+        android:checked="true"
+        android:text="@string/create_wallet_sensor_entropy"
+        android:textColor="#A7ADB5"
+        android:textSize="13sp" />
+
+    <CheckBox
+        android:id="@+id/chkCameraEntropy"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:text="@string/create_wallet_camera_entropy"
+        android:textColor="#A7ADB5"
+        android:textSize="13sp" />
+
     <androidx.appcompat.widget.AppCompatButton
         android:id="@+id/btnCreate"
         android:layout_width="match_parent"

@@ -219,4 +219,10 @@
     <string name="toast_history_rescan_failed">Échec de la recherche des paiements manquants.</string>
 
     <string name="status_ready">Prêt</string>
+
+    <string name="create_wallet_sensor_entropy">Utiliser les capteurs de l’appareil comme entropie supplémentaire</string>
+    <string name="create_wallet_camera_entropy">Utiliser une photo de l’appareil photo comme entropie supplémentaire</string>
+    <string name="toast_camera_unavailable">Caméra indisponible</string>
+    <string name="status_collecting_entropy">Collecte de l’entropie…</string>
+    <string name="toast_camera_permission_denied">Permission de la caméra refusée</string>
 </resources>
