@@ -39,6 +39,7 @@ public class HistoryActivity extends AppCompatActivity {
     private TextView txtHistoryCount;
 
     private String contactFilterAddress = null;
+    private String searchQuery = null;
 
     private Handler uiHandler;
     private Runnable updater;
@@ -89,17 +90,18 @@ public class HistoryActivity extends AppCompatActivity {
             public void onTextChanged(CharSequence s, int start, int before, int count) {
                 String typed = s.toString().trim();
                 if (typed.isEmpty()) {
+                    searchQuery = null;
                     contactFilterAddress = null;
                     btnClearContactFilter.setVisibility(View.GONE);
                 } else {
+                    searchQuery = typed;
                     Contact matched = findContactByNameOrAddress(typed);
                     if (matched != null) {
                         contactFilterAddress = matched.address;
-                        btnClearContactFilter.setVisibility(View.VISIBLE);
                     } else {
                         contactFilterAddress = null;
-                        btnClearContactFilter.setVisibility(View.GONE);
                     }
+                    btnClearContactFilter.setVisibility(View.VISIBLE);
                 }
                 applyFiltersAndSort();
             }
@@ -112,6 +114,7 @@ public class HistoryActivity extends AppCompatActivity {
         autoCompleteContact.setOnItemClickListener((parent, view, position, id) -> {
             Contact selected = contactAdapter.getItem(position);
             if (selected != null) {
+                searchQuery = selected.name;
                 contactFilterAddress = selected.address;
                 btnClearContactFilter.setVisibility(View.VISIBLE);
                 applyFiltersAndSort();
@@ -120,6 +123,7 @@ public class HistoryActivity extends AppCompatActivity {
 
         btnClearContactFilter.setOnClickListener(v -> {
             autoCompleteContact.setText("");
+            searchQuery = null;
             contactFilterAddress = null;
             btnClearContactFilter.setVisibility(View.GONE);
             applyFiltersAndSort();
@@ -252,6 +256,12 @@ public class HistoryActivity extends AppCompatActivity {
             if (include && contactFilterAddress != null) {
                 include = tx.from.equalsIgnoreCase(contactFilterAddress)
                         || tx.to.equalsIgnoreCase(contactFilterAddress);
+            } else if (include && searchQuery != null && !searchQuery.isEmpty()) {
+                String q = searchQuery.toLowerCase();
+                String txid = tx.txid != null ? tx.txid.toLowerCase() : "";
+                String from = tx.from != null ? tx.from.toLowerCase() : "";
+                String to = tx.to != null ? tx.to.toLowerCase() : "";
+                include = txid.contains(q) || from.contains(q) || to.contains(q);
             }
 
             if (include) {

@@ -19,7 +19,7 @@
             android:layout_height="52dp"
             android:layout_weight="1"
             android:background="@drawable/bg_input"
-            android:hint="@string/hint_search_contact"
+            android:hint="@string/hint_search_contact_or_txid"
             android:inputType="text"
             android:paddingStart="14dp"
             android:paddingEnd="14dp"

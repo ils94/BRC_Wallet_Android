@@ -183,7 +183,7 @@
 
     <string name="label_my_address">Meu endereço</string>
 
-    <string name="hint_search_contact">Buscar contato…</string>
+    <string name="hint_search_contact_or_txid">Pesquisar contato, endereço ou txid</string>
     <string name="clear_contact_filter">Limpar filtro de contato</string>
 
     <string name="notification_incoming_title">BRC recebido</string>
