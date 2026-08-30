@@ -183,8 +183,6 @@ public class HistoryActivity extends AppCompatActivity {
     private void updateSummary() {
         String balance = TxBuilder.weiToBrc(store.getBalanceWei());
         txtHistoryBalance.setText(getString(R.string.history_balance, balance));
-        int total = allTransactions != null ? allTransactions.size() : 0;
-        txtHistoryCount.setText(getString(R.string.history_tx_count, total));
     }
 
     private Contact findContactByNameOrAddress(String query) {
@@ -278,6 +276,8 @@ public class HistoryActivity extends AppCompatActivity {
         filtered.sort(comparator);
 
         adapter.updateList(filtered);
+
+        txtHistoryCount.setText(getString(R.string.history_tx_count, filtered.size()));
 
         TextView txtEmpty = findViewById(R.id.txtEmpty);
         RecyclerView recyclerView = findViewById(R.id.recyclerHistory);
