@@ -24,6 +24,10 @@ public class WalletOperations {
         void onNewHistory(List<TxRecord> newTxs, boolean isFirstSync);
     }
 
+    public interface SendCallback {
+        void onComplete(boolean success, String message, String txid);
+    }
+
     private final ExecutorService io = Executors.newSingleThreadExecutor();
     private final WalletStore store;
     private final BRCApi api;
@@ -149,12 +153,13 @@ public class WalletOperations {
         });
     }
 
-    public void sendTransaction(byte[] to, long amountWei, long feeWei, String password, CompletionCallback doneCallback) {
+    public void sendTransaction(byte[] to, long amountWei, long feeWei, String password,
+                                SendCallback doneCallback) {
         final byte[] priv;
         try {
             priv = store.loadPrivateKey(password);
         } catch (Exception e) {
-            postCompletion(doneCallback, false, context.getString(R.string.toast_wrong_password));
+            postSend(doneCallback, false, context.getString(R.string.toast_wrong_password), null);
             return;
         }
 
@@ -170,28 +175,37 @@ public class WalletOperations {
                 store.saveSyncState(state.height, state.balanceWei, state.nonce);
 
                 if (state.balanceWei < amountWei + feeWei) {
-                    postCompletion(doneCallback, false,
+                    postSend(doneCallback, false,
                             context.getString(R.string.status_insufficient_balance,
-                                    TxBuilder.weiToBrc(state.balanceWei)));
+                                    TxBuilder.weiToBrc(state.balanceWei)), null);
                     return;
                 }
 
                 byte[] tx = TxBuilder.buildSignedTransfer(priv, to, amountWei, feeWei, state.nonce);
+                String txid = TxBuilder.sha256Hex(tx);
+
                 BRCApi.SubmitResult res = api.submitTxs(
                         Collections.singletonList(TxBuilder.toHex(tx)));
 
                 if (res.ok()) {
                     store.saveSyncState(state.height, state.balanceWei, state.nonce + 1);
-                    postCompletion(doneCallback, true, context.getString(R.string.status_tx_admitted));
+                    postSend(doneCallback, true,
+                            context.getString(R.string.status_tx_admitted), txid);
                 } else {
-                    postCompletion(doneCallback, false,
-                            context.getString(R.string.status_tx_rejected, res.errors));
+                    postSend(doneCallback, false,
+                            context.getString(R.string.status_tx_rejected, res.errors), null);
                 }
             } catch (Exception e) {
-                postCompletion(doneCallback, false,
-                        context.getString(R.string.status_send_error, e.getMessage()));
+                postSend(doneCallback, false,
+                        context.getString(R.string.status_send_error, e.getMessage()), null);
             }
         });
+    }
+
+    private void postSend(SendCallback callback, boolean success, String message, String txid) {
+        if (callback != null) {
+            mainHandler.post(() -> callback.onComplete(success, message, txid));
+        }
     }
 
     private void postProgress(ProgressCallback callback, String message) {

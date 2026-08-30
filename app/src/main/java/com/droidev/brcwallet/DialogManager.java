@@ -2,6 +2,8 @@ package com.droidev.brcwallet;
 
 import android.annotation.SuppressLint;
 import android.app.Dialog;
+import android.content.ClipData;
+import android.content.ClipboardManager;
 import android.content.Context;
 import android.os.Handler;
 import android.os.Looper;
@@ -726,5 +728,30 @@ public class DialogManager {
 
     private void toast(String message) {
         Toast.makeText(context, message, Toast.LENGTH_SHORT).show();
+    }
+
+    public void showTxidDialog(String txid) {
+        if (txid == null || txid.isEmpty()) return;
+
+        @SuppressLint("InflateParams")
+        View view = LayoutInflater.from(context).inflate(R.layout.dialog_tx_sent, null);
+        TextView txtTxid = view.findViewById(R.id.txtTxid);
+        Button btnCopy = view.findViewById(R.id.btnCopyTxid);
+
+        txtTxid.setText(txid);
+
+        Dialog dialog = createStyledDialog(view);
+        dialog.setCancelable(false);
+        dialog.setCanceledOnTouchOutside(false);
+
+        btnCopy.setOnClickListener(v -> {
+            ClipboardManager clipboard =
+                    (ClipboardManager) context.getSystemService(Context.CLIPBOARD_SERVICE);
+            clipboard.setPrimaryClip(ClipData.newPlainText("txid", txid));
+            toast(context.getString(R.string.toast_txid_copied));
+            dialog.dismiss();
+        });
+
+        dialog.show();
     }
 }

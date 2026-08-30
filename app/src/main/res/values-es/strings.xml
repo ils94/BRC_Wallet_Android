@@ -225,4 +225,9 @@
     <string name="toast_camera_unavailable">Cámara no disponible</string>
     <string name="status_collecting_entropy">Recopilando entropía…</string>
     <string name="toast_camera_permission_denied">Permiso de cámara denegado</string>
+
+    <string name="dialog_tx_sent_title">Transacción enviada</string>
+    <string name="dialog_tx_sent_message">Copia el ID de la transacción a continuación. Este diálogo solo se cerrará después de copiarlo.</string>
+    <string name="button_copy_txid">Copiar ID de transacción</string>
+    <string name="toast_txid_copied">ID de transacción copiado</string>
 </resources>

@@ -124,11 +124,25 @@ public class ContactsActivity extends AppCompatActivity
         };
 
         dialogManager = new DialogManager(this, walletStore, new DialogManager.WalletActionCallback() {
-            @Override public void onWalletCreated() {}
-            @Override public void onWalletImported() {}
-            @Override public void onWalletExported(byte[] privKey) {}
-            @Override public void onServerChanged(String newUrl) {}
-            @Override public void onHeightSet(long height) {}
+            @Override
+            public void onWalletCreated() {
+            }
+
+            @Override
+            public void onWalletImported() {
+            }
+
+            @Override
+            public void onWalletExported(byte[] privKey) {
+            }
+
+            @Override
+            public void onServerChanged(String newUrl) {
+            }
+
+            @Override
+            public void onHeightSet(long height) {
+            }
 
             @Override
             public void onHistoryRescanRequested(long height) {
@@ -137,7 +151,13 @@ public class ContactsActivity extends AppCompatActivity
 
             @Override
             public void onSendRequested(byte[] to, long amountWei, long feeWei, String password) {
-                operations.sendTransaction(to, amountWei, feeWei, password, (success, message) -> Toast.makeText(ContactsActivity.this, message, Toast.LENGTH_LONG).show());
+                operations.sendTransaction(to, amountWei, feeWei, password, (success, message, txid) -> {
+                    if (success && txid != null) {
+                        dialogManager.showTxidDialog(txid);
+                    } else {
+                        Toast.makeText(ContactsActivity.this, message, Toast.LENGTH_LONG).show();
+                    }
+                });
             }
         });
 

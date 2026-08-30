@@ -287,11 +287,15 @@ public class MainActivity extends AppCompatActivity
     @Override
     public void onSendRequested(byte[] to, long amountWei, long feeWei, String password) {
         setStatus(getString(R.string.status_sending));
-        operations.sendTransaction(to, amountWei, feeWei, password, (success, message) -> {
+        operations.sendTransaction(to, amountWei, feeWei, password, (success, message, txid) -> {
             if (success) {
-                toast(message);
-                updateUi();
                 setStatus(getString(R.string.status_tx_sent_wait));
+                updateUi();
+                if (txid != null) {
+                    dialogs.showTxidDialog(txid);
+                } else {
+                    toast(message);
+                }
             } else {
                 setStatus(message);
             }
