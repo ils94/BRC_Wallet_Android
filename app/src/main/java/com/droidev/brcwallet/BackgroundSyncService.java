@@ -166,14 +166,18 @@ public class BackgroundSyncService extends Service {
     }
 
     private PendingIntent getHistoryActivityPendingIntent() {
-        Intent historyIntent = new Intent(this, HistoryActivity.class);
+        Intent intent = new Intent(this, MainActivity.class);
+        intent.setAction("com.droidev.brcwallet.OPEN_HISTORY");
+        intent.putExtra(MainActivity.EXTRA_OPEN_HISTORY, true);
+        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP
+                | Intent.FLAG_ACTIVITY_SINGLE_TOP);
 
-        return TaskStackBuilder.create(this)
-                .addNextIntentWithParentStack(historyIntent)
-                .getPendingIntent(
-                        1,
-                        PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE
-                );
+        return PendingIntent.getActivity(
+                this,
+                1,
+                intent,
+                PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE
+        );
     }
 
     private void createNotificationChannels() {

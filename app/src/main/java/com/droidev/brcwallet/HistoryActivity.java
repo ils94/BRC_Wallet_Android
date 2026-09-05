@@ -299,13 +299,4 @@ public class HistoryActivity extends AppCompatActivity {
             recyclerView.setVisibility(View.VISIBLE);
         }
     }
-
-    @SuppressLint({"GestureBackNavigation", "MissingSuperCall"})
-    @Override
-    public void onBackPressed() {
-        Intent intent = new Intent(this, MainActivity.class);
-        intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP);
-        startActivity(intent);
-        finish();
-    }
 }

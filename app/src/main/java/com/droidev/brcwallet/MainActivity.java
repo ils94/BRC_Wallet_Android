@@ -21,6 +21,7 @@ import android.widget.Toast;
 
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.app.AppCompatDelegate;
 import androidx.core.graphics.Insets;
@@ -49,6 +50,8 @@ public class MainActivity extends AppCompatActivity
     private EditText tempEdtTo;
     private Handler uiHandler;
     private Runnable balanceUpdater;
+
+    public static final String EXTRA_OPEN_HISTORY = "open_history";
 
     private DialogManager.CameraEntropyResult pendingEntropyResult;
 
@@ -141,6 +144,8 @@ public class MainActivity extends AppCompatActivity
 
         updateUi();
 
+        handleOpenHistoryIntent(getIntent());
+
         uiHandler = new Handler(Looper.getMainLooper());
         balanceUpdater = new Runnable() {
             @Override
@@ -150,6 +155,21 @@ public class MainActivity extends AppCompatActivity
             }
         };
         uiHandler.post(balanceUpdater);
+    }
+
+    @Override
+    protected void onNewIntent(@NonNull Intent intent) {
+        super.onNewIntent(intent);
+        setIntent(intent);
+        handleOpenHistoryIntent(intent);
+    }
+
+    private void handleOpenHistoryIntent(Intent intent) {
+        if (intent == null) return;
+        if (intent.getBooleanExtra(EXTRA_OPEN_HISTORY, false)) {
+            intent.removeExtra(EXTRA_OPEN_HISTORY);
+            startActivity(new Intent(this, HistoryActivity.class));
+        }
     }
 
     @Override
