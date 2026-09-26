@@ -99,6 +99,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginTop="4dp"
+        android:gravity="center_vertical"
         android:orientation="horizontal">
 
         <TextView
@@ -120,12 +121,24 @@
             android:textColor="#4FC3F7"
             android:textSize="13sp"
             android:textStyle="bold" />
+
+        <ImageButton
+            android:id="@+id/btnAddFromContact"
+            android:layout_width="32dp"
+            android:layout_height="32dp"
+            android:layout_marginStart="4dp"
+            android:background="?attr/selectableItemBackgroundBorderless"
+            android:contentDescription="@string/add_to_contacts"
+            android:padding="6dp"
+            android:src="@drawable/ic_add_contact"
+            android:visibility="gone" />
     </LinearLayout>
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginTop="4dp"
+        android:gravity="center_vertical"
         android:orientation="horizontal">
 
         <TextView
@@ -147,6 +160,17 @@
             android:textColor="#4FC3F7"
             android:textSize="13sp"
             android:textStyle="bold" />
+
+        <ImageButton
+            android:id="@+id/btnAddToContact"
+            android:layout_width="32dp"
+            android:layout_height="32dp"
+            android:layout_marginStart="4dp"
+            android:background="?attr/selectableItemBackgroundBorderless"
+            android:contentDescription="@string/add_to_contacts"
+            android:padding="6dp"
+            android:src="@drawable/ic_add_contact"
+            android:visibility="gone" />
     </LinearLayout>
 
 </LinearLayout>

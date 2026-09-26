@@ -230,4 +230,7 @@
     <string name="dialog_tx_sent_message">Copie o ID da transação abaixo. Este diálogo só será fechado depois que você copiá-lo.</string>
     <string name="button_copy_txid">Copiar ID da transação</string>
     <string name="toast_txid_copied">ID da transação copiado</string>
+
+    <string name="add_to_contacts">Adicionar aos contatos</string>
+    <string name="toast_contact_added">Contato adicionado</string>
 </resources>

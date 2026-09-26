@@ -7,6 +7,7 @@ import android.net.Uri;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageButton;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -25,14 +26,23 @@ public class TransactionAdapter extends RecyclerView.Adapter<TransactionAdapter.
     private static final int COLOR_LINK = 0xFF4FC3F7;
     private static final int COLOR_MUTED = 0xFFA7ADB5;
 
+    public interface AddContactListener {
+        void onAddContact(String address);
+    }
+
     private List<TxRecord> transactions;
     private final ContactsStore contactsStore;
     private final String myAddress;
+    private final AddContactListener addContactListener;
 
-    public TransactionAdapter(List<TxRecord> transactions, ContactsStore contactsStore, String myAddress) {
+    public TransactionAdapter(List<TxRecord> transactions,
+                              ContactsStore contactsStore,
+                              String myAddress,
+                              AddContactListener addContactListener) {
         this.transactions = transactions;
         this.contactsStore = contactsStore;
         this.myAddress = myAddress;
+        this.addContactListener = addContactListener;
     }
 
     @NonNull
@@ -79,14 +89,17 @@ public class TransactionAdapter extends RecyclerView.Adapter<TransactionAdapter.
             holder.txtTxidValue.setOnClickListener(null);
         }
 
+        // === FROM ===
         if (tx.type == TxRecord.Type.MINE) {
             holder.txtFromValue.setText(context.getString(R.string.label_coinbase));
             holder.txtFromValue.setTextColor(COLOR_MUTED);
             holder.txtFromValue.setOnClickListener(null);
+            holder.btnAddFromContact.setVisibility(View.GONE);
         } else if (tx.type == TxRecord.Type.REDEEM) {
             holder.txtFromValue.setText(context.getString(R.string.label_script_redeem));
             holder.txtFromValue.setTextColor(COLOR_MUTED);
             holder.txtFromValue.setOnClickListener(null);
+            holder.btnAddFromContact.setVisibility(View.GONE);
         } else {
             String fromAddress = tx.from.isEmpty() ? "?" : tx.from;
             String fromDisplay = resolveDisplayAddress(context, fromAddress);
@@ -100,12 +113,15 @@ public class TransactionAdapter extends RecyclerView.Adapter<TransactionAdapter.
                 holder.txtFromValue.setTextColor(COLOR_MUTED);
                 holder.txtFromValue.setOnClickListener(null);
             }
+            setupAddButton(context, holder.btnAddFromContact, fromAddress);
         }
 
+        // === TO ===
         if (tx.type == TxRecord.Type.LOCK) {
             holder.txtToValue.setText(context.getString(R.string.label_script_lock));
             holder.txtToValue.setTextColor(COLOR_MUTED);
             holder.txtToValue.setOnClickListener(null);
+            holder.btnAddToContact.setVisibility(View.GONE);
         } else {
             String toAddress = tx.to.isEmpty() ? "?" : tx.to;
             String toDisplay = resolveDisplayAddress(context, toAddress);
@@ -119,7 +135,43 @@ public class TransactionAdapter extends RecyclerView.Adapter<TransactionAdapter.
                 holder.txtToValue.setTextColor(COLOR_MUTED);
                 holder.txtToValue.setOnClickListener(null);
             }
+            setupAddButton(context, holder.btnAddToContact, toAddress);
         }
+    }
+
+    /**
+     * Mostra o botão "+" somente se o endereço for válido, não for o próprio
+     * e ainda não existir na lista de contatos.
+     */
+    private void setupAddButton(Context context, ImageButton btn, String address) {
+        if (address == null || address.equals("?") || address.isEmpty()) {
+            btn.setVisibility(View.GONE);
+            btn.setOnClickListener(null);
+            return;
+        }
+        if (myAddress != null && myAddress.equalsIgnoreCase(address)) {
+            btn.setVisibility(View.GONE);
+            btn.setOnClickListener(null);
+            return;
+        }
+        if (contactExists(address)) {
+            btn.setVisibility(View.GONE);
+            btn.setOnClickListener(null);
+            return;
+        }
+        btn.setVisibility(View.VISIBLE);
+        btn.setOnClickListener(v -> {
+            if (addContactListener != null) {
+                addContactListener.onAddContact(address);
+            }
+        });
+    }
+
+    private boolean contactExists(String address) {
+        for (Contact c : contactsStore.loadContacts()) {
+            if (c.address.equalsIgnoreCase(address)) return true;
+        }
+        return false;
     }
 
     @Override
@@ -137,34 +189,25 @@ public class TransactionAdapter extends RecyclerView.Adapter<TransactionAdapter.
         if (address == null || address.equals("?")) {
             return "?";
         }
-
         if (myAddress != null && !myAddress.isEmpty() && myAddress.equalsIgnoreCase(address)) {
             return context.getString(R.string.label_my_address);
         }
-
         for (Contact contact : contactsStore.loadContacts()) {
             if (contact.address.equalsIgnoreCase(address)) {
                 return contact.name;
             }
         }
-
         return address;
     }
 
     private String getTypeLabel(Context context, TxRecord.Type type) {
         switch (type) {
-            case SEND:
-                return context.getString(R.string.tx_type_send);
-            case RECEIVE:
-                return context.getString(R.string.tx_type_receive);
-            case MINE:
-                return context.getString(R.string.tx_type_mine);
-            case LOCK:
-                return context.getString(R.string.tx_type_lock);
-            case REDEEM:
-                return context.getString(R.string.tx_type_redeem);
-            default:
-                return "?";
+            case SEND: return context.getString(R.string.tx_type_send);
+            case RECEIVE: return context.getString(R.string.tx_type_receive);
+            case MINE: return context.getString(R.string.tx_type_mine);
+            case LOCK: return context.getString(R.string.tx_type_lock);
+            case REDEEM: return context.getString(R.string.tx_type_redeem);
+            default: return "?";
         }
     }
 
@@ -180,6 +223,7 @@ public class TransactionAdapter extends RecyclerView.Adapter<TransactionAdapter.
     static class ViewHolder extends RecyclerView.ViewHolder {
         TextView txtType, txtAmount, txtTxDate;
         TextView txtBlockValue, txtTxidValue, txtFromValue, txtToValue;
+        ImageButton btnAddFromContact, btnAddToContact;
 
         ViewHolder(View itemView) {
             super(itemView);
@@ -190,6 +234,8 @@ public class TransactionAdapter extends RecyclerView.Adapter<TransactionAdapter.
             txtTxidValue = itemView.findViewById(R.id.txtTxidValue);
             txtFromValue = itemView.findViewById(R.id.txtFromValue);
             txtToValue = itemView.findViewById(R.id.txtToValue);
+            btnAddFromContact = itemView.findViewById(R.id.btnAddFromContact);
+            btnAddToContact = itemView.findViewById(R.id.btnAddToContact);
         }
     }
 }

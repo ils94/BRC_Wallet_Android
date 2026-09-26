@@ -1,7 +1,5 @@
 package com.droidev.brcwallet;
 
-import android.annotation.SuppressLint;
-import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
@@ -14,6 +12,7 @@ import android.widget.AutoCompleteTextView;
 import android.widget.ImageButton;
 import android.widget.Spinner;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.graphics.Insets;
@@ -32,6 +31,7 @@ public class HistoryActivity extends AppCompatActivity {
     private TransactionAdapter adapter;
     private WalletStore store;
     private ContactsStore contactsStore;
+    private DialogManager dialogManager;
 
     private AutoCompleteTextView autoCompleteContact;
     private ImageButton btnClearContactFilter;
@@ -71,7 +71,66 @@ public class HistoryActivity extends AppCompatActivity {
         byte[] pub = store.loadPublicKey();
         String myAddress = pub != null ? TxBuilder.toHex(pub) : "";
 
-        adapter = new TransactionAdapter(new ArrayList<>(), contactsStore, myAddress);
+        dialogManager = new DialogManager(this, store, new DialogManager.WalletActionCallback() {
+            @Override
+            public void onWalletCreated() {
+            }
+
+            @Override
+            public void onWalletImported() {
+            }
+
+            @Override
+            public void onWalletExported(byte[] privKey) {
+            }
+
+            @Override
+            public void onServerChanged(String newUrl) {
+            }
+
+            @Override
+            public void onHeightSet(long height) {
+            }
+
+            @Override
+            public void onHistoryRescanRequested(long height) {
+            }
+
+            @Override
+            public void onSendRequested(byte[] to, long amountWei, long feeWei, String password) {
+            }
+        });
+
+        dialogManager.setContactCallback(new DialogManager.ContactActionCallback() {
+            @Override
+            public void onContactAdded(String name, String address) {
+                if (contactsStore.addContact(new Contact(name, address))) {
+                    allTransactions = store.loadHistory();
+                    applyFiltersAndSort();
+                    Toast.makeText(HistoryActivity.this,
+                            R.string.toast_contact_added, Toast.LENGTH_SHORT).show();
+                } else {
+                    Toast.makeText(HistoryActivity.this,
+                            R.string.toast_contact_duplicate, Toast.LENGTH_LONG).show();
+                }
+            }
+
+            @Override
+            public void onContactEdited(int position, String name, String address) {
+            }
+
+            @Override
+            public void onContactDeleted(int position) {
+            }
+        });
+
+        adapter = new TransactionAdapter(
+                new ArrayList<>(),
+                contactsStore,
+                myAddress,
+                address -> dialogManager.showAddContactPrefilledDialog(address)
+        );
+
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
         recyclerView.setAdapter(adapter);
 

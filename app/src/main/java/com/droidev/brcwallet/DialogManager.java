@@ -754,4 +754,33 @@ public class DialogManager {
 
         dialog.show();
     }
+
+    public void showAddContactPrefilledDialog(String address) {
+        if (contactCallback == null) return;
+        if (address == null || address.isEmpty()) return;
+
+        @SuppressLint("InflateParams")
+        View view = LayoutInflater.from(context).inflate(R.layout.dialog_add_contact_prefilled, null);
+        EditText edtName = view.findViewById(R.id.edtName);
+        TextView txtAddress = view.findViewById(R.id.txtAddress);
+        Button btnSave = view.findViewById(R.id.btnSave);
+        TextView btnCancel = view.findViewById(R.id.btnCancel);
+
+        txtAddress.setText(address);
+
+        Dialog dialog = createStyledDialog(view);
+
+        btnSave.setOnClickListener(v -> {
+            String name = edtName.getText().toString().trim();
+            if (name.isEmpty()) {
+                toast(context.getString(R.string.toast_contact_empty_fields));
+                return;
+            }
+            dialog.dismiss();
+            contactCallback.onContactAdded(name, address);
+        });
+
+        btnCancel.setOnClickListener(v -> dialog.dismiss());
+        dialog.show();
+    }
 }

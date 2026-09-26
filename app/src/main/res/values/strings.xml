@@ -230,4 +230,7 @@
     <string name="dialog_tx_sent_message">Copy the transaction ID below. This dialog closes only after you copy it.</string>
     <string name="button_copy_txid">Copy transaction ID</string>
     <string name="toast_txid_copied">Transaction ID copied</string>
+
+    <string name="add_to_contacts">Add to contacts</string>
+    <string name="toast_contact_added">Contact added</string>
 </resources>
